@@ -739,6 +739,68 @@ docker exec -it openclaw sh
 
 ---
 
+## 15. Termux (Android) Deployment
+
+OpenClaw JS can run on Android devices via [Termux](https://termux.dev/), a terminal emulator and Linux environment for Android.
+
+### Quick Install (One Command)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-js/main/install-termux.sh | bash
+```
+
+This script will:
+1. Update Termux packages
+2. Install Node.js LTS, git, python, build tools
+3. Clone the repository to `~/openclaw-js`
+4. Install npm dependencies
+5. Create initial `.env` configuration
+6. Apply Termux-specific settings:
+   - Disable browser automation (no Chrome on Android)
+   - Bind gateway to `0.0.0.0` for network access
+   - Skip Puppeteer Chrome download
+7. Create convenient shortcuts (`openclaw` command)
+
+### Post-Install
+
+```bash
+# Configure API keys
+nano ~/openclaw-js/.env
+
+# Start OpenClaw
+openclaw
+# or
+cd ~/openclaw-js && npm start
+```
+
+### Accessing the Gateway
+
+On Termux, the gateway binds to `0.0.0.0:18789`, allowing access from:
+- Local device: `http://localhost:18789`
+- Network devices: `http://<phone-ip>:18789`
+
+Find your IP:
+```bash
+ifconfig
+# or
+ip addr
+```
+
+### Termux Tips
+
+- **Keep running in background**: Run `termux-wake-lock` before starting OpenClaw
+- **Home screen shortcut**: Install Termux:Widget, then use the `openclaw` shortcut
+- **Update**: Run `~/openclaw-js/update-termux.sh`
+- **Battery optimization**: Disable battery optimization for Termux in Android settings
+
+### Limitations on Termux
+
+- Browser automation (Puppeteer) is disabled
+- Some native modules may compile slower on ARM devices
+- WhatsApp QR scanning works best with external camera apps
+
+---
+
 ## Appendix: Dependency Audit Summary
 
 **Last Audit**: 2026-02-18

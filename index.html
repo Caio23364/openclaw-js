@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Config</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-indigo-500/30 pb-24 lg:pb-8">
+
+  <header class="bg-slate-900 shadow-sm border-b border-slate-800 sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+          <div class="bg-indigo-500 p-2 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-white leading-tight">OpenClaw Config</h1>
+            <p class="text-xs text-slate-400 font-medium">Gerador de configurações</p>
+          </div>
+        </div>
+        <div class="hidden lg:flex space-x-3">
+          <button id="btn-copy-desktop" class="flex items-center px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors">
+            <svg id="icon-copy-desktop" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <svg id="icon-check-desktop" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2 text-emerald-400 hidden"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Copiar</span>
+          </button>
+          <button id="btn-download-desktop" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            <span id="lbl-download-desktop">Baixar .env</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex space-x-2 mt-6 bg-slate-950/50 p-1 rounded-xl w-full max-w-md overflow-hidden border border-slate-800">
+        <button id="tab-env" class="flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all bg-slate-800 text-white shadow-sm ring-1 ring-slate-700">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+          <span>Variáveis (.env)</span>
+        </button>
+        <button id="tab-cli" class="flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/></svg>
+          <span>Launch CLI</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="lg:col-span-7 space-y-6">
+        
+        <div id="view-env" class="space-y-6 block">
+          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+              <h2 class="text-lg font-semibold text-white">Provedores de IA</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Anthropic Claude (Recomendado)</label><input type="password" data-form="env" name="ANTHROPIC_API_KEY" placeholder="sk-ant-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">OpenAI</label><input type="password" data-form="env" name="OPENAI_API_KEY" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Google Gemini</label><input type="password" data-form="env" name="GOOGLE_API_KEY" placeholder="AIza..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">DeepSeek</label><input type="password" data-form="env" name="DEEPSEEK_API_KEY" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Groq</label><input type="password" data-form="env" name="GROQ_API_KEY" placeholder="gsk_..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">OpenRouter</label><input type="password" data-form="env" name="OPENROUTER_API_KEY" placeholder="sk-or-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+              <h2 class="text-lg font-semibold text-white">Modelos Locais</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Ollama Base URL</label><input type="text" data-form="env" name="OLLAMA_BASE_URL" value="http://127.0.0.1:11434" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Open WebUI Base URL</label><input type="text" data-form="env" name="OPEN_WEBUI_BASE_URL" value="http://127.0.0.1:8080/api" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Open WebUI API Key</label><input type="password" data-form="env" name="OPEN_WEBUI_API_KEY" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+              <h2 class="text-lg font-semibold text-white">Configuração do Servidor</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Porta</label><input type="text" data-form="env" name="PORT" value="3000" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Host</label><input type="text" data-form="env" name="HOST" value="0.0.0.0" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">API Token (Segurança)</label><input type="password" data-form="env" name="API_TOKEN" placeholder="Seu token super secreto" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1.5">Modo Worker</label>
+                <select data-form="env" name="WORKER_MODE" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+                  <option value="false">false</option>
+                  <option value="true">true</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+              <h2 class="text-lg font-semibold text-white">Sistema e Memória</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1.5">Backend de Memória</label>
+                <select data-form="env" name="MEMORY_BACKEND" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+                  <option value="none">none</option>
+                  <option value="markdown" selected>markdown</option>
+                  <option value="sqlite">sqlite</option>
+                </select>
+              </div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Computer-Use Endpoint</label><input type="text" data-form="env" name="COMPUTER_USE_ENDPOINT" value="http://127.0.0.1:8787/v1/actions" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-cli" class="space-y-6 hidden">
+          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/></svg>
+              <h2 class="text-lg font-semibold text-white">Comando Base</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1.5">Executável</label>
+                <select data-form="cli" name="executable" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+                  <option value="npx openclaw">npx openclaw</option>
+                  <option value="node bin/openclaw.js">node bin/openclaw.js</option>
+                  <option value="docker run -p 3000:3000 openclaw">docker run -p 3000:3000 openclaw</option>
+                </select>
+              </div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Caminho do .env</label><input type="text" data-form="cli" name="configPath" value="./.env" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1.5">Nível de Log</label>
+                <select data-form="cli" name="logLevel" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+                  <option value="info">info</option>
+                  <option value="debug">debug</option>
+                  <option value="warn">warn</option>
+                  <option value="error">error</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+              <h2 class="text-lg font-semibold text-white">Rede & Sistema</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Porta (--port)</label><input type="text" data-form="cli" name="port" value="3000" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Host (--host)</label><input type="text" data-form="cli" name="host" value="0.0.0.0" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1.5">Memória (--memory)</label>
+                <select data-form="cli" name="memory" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+                  <option value="markdown">markdown</option>
+                  <option value="sqlite">sqlite</option>
+                  <option value="none">none</option>
+                </select>
+              </div>
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="worker-checkbox" data-form="cli" name="worker" class="w-5 h-5 rounded border-slate-700 bg-slate-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer" />
+                <label for="worker-checkbox" class="text-sm font-medium text-slate-300 cursor-pointer select-none">Ativar Modo Worker (--worker)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5">
+        <div class="bg-[#1e1e2e] rounded-xl shadow-2xl overflow-hidden sticky top-32 border border-slate-800">
+          <div class="flex items-center justify-between px-4 py-3 bg-[#181825] border-b border-slate-700/50">
+            <div class="flex items-center space-x-2">
+              <div class="flex space-x-1.5">
+                <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+              </div>
+              <span id="preview-title" class="ml-2 text-xs font-mono text-slate-400">.env</span>
+            </div>
+          </div>
+          <div class="p-4 overflow-x-auto min-h-[150px]">
+            <pre id="preview-content" class="text-sm font-mono whitespace-pre-wrap leading-relaxed text-[#cdd6f4]"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 flex space-x-4 lg:hidden z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    <button id="btn-copy-mobile" class="flex-1 flex justify-center items-center px-4 py-3 text-sm font-medium text-slate-200 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 active:scale-[0.98] transition-all">
+      <svg id="icon-copy-mobile" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+      <svg id="icon-check-mobile" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-emerald-400 hidden"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Copiar</span>
+    </button>
+    <button id="btn-download-mobile" class="flex-1 flex justify-center items-center px-4 py-3 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+      <span>Baixar</span>
+    </button>
+  </div>
+
+  <script>
+    const formData = {
+      ANTHROPIC_API_KEY: '', OPENAI_API_KEY: '', GOOGLE_API_KEY: '', DEEPSEEK_API_KEY: '', GROQ_API_KEY: '', OPENROUTER_API_KEY: '',
+      OLLAMA_BASE_URL: 'http://127.0.0.1:11434', OPEN_WEBUI_BASE_URL: 'http://127.0.0.1:8080/api', OPEN_WEBUI_API_KEY: '',
+      PORT: '3000', HOST: '0.0.0.0', API_TOKEN: '', WORKER_MODE: 'false',
+      MEMORY_BACKEND: 'markdown', COMPUTER_USE_ENDPOINT: 'http://127.0.0.1:8787/v1/actions'
+    };
+
+    const cliData = {
+      executable: 'npx openclaw', port: '3000', host: '0.0.0.0', worker: false, memory: 'markdown', configPath: './.env', logLevel: 'info'
+    };
+
+    let activeTab = 'env';
+    let envContent = '';
+    let cliContent = '';
+
+    const viewEnv = document.getElementById('view-env');
+    const viewCli = document.getElementById('view-cli');
+    const tabEnv = document.getElementById('tab-env');
+    const tabCli = document.getElementById('tab-cli');
+    const previewTitle = document.getElementById('preview-title');
+    const previewContent = document.getElementById('preview-content');
+    const lblDownloadDesktop = document.getElementById('lbl-download-desktop');
+
+    function updateEnvContent() {
+      let result = '# ============================================\n# OpenClaw Environment Variables\n# ============================================\n\n# --- Provedores de IA ---\n';
+      ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY'].forEach(key => {
+        if (formData[key]) result += key + '=' + formData[key] + '\n';
+      });
+      result += '\n# --- Modelos Locais ---\n';
+      ['OLLAMA_BASE_URL', 'OPEN_WEBUI_BASE_URL', 'OPEN_WEBUI_API_KEY'].forEach(key => {
+        if (formData[key]) result += key + '=' + formData[key] + '\n';
+      });
+      result += '\n# --- Configuração do Servidor ---\n';
+      ['PORT', 'HOST', 'API_TOKEN', 'WORKER_MODE'].forEach(key => {
+        if (formData[key]) result += key + '=' + formData[key] + '\n';
+      });
+      result += '\n# --- Memória e Sistema ---\n';
+      ['MEMORY_BACKEND', 'COMPUTER_USE_ENDPOINT'].forEach(key => {
+        if (formData[key]) result += key + '=' + formData[key] + '\n';
+      });
+      envContent = result;
+      renderPreview();
+    }
+
+    function updateCliContent() {
+      let cmd = cliData.executable;
+      if (cliData.executable.startsWith('docker')) {
+        cmd += ' --env-file ' + cliData.configPath;
+        cliContent = cmd;
+        renderPreview();
+        return;
+      }
+      if (cliData.port) cmd += ' --port ' + cliData.port;
+      if (cliData.host) cmd += ' --host ' + cliData.host;
+      if (cliData.memory) cmd += ' --memory ' + cliData.memory;
+      if (cliData.logLevel && cliData.logLevel !== 'info') cmd += ' --log ' + cliData.logLevel;
+      if (cliData.configPath !== './.env') cmd += ' --config ' + cliData.configPath;
+      if (cliData.worker) cmd += ' --worker';
+      cliContent = cmd;
+      renderPreview();
+    }
+
+    function renderPreview() {
+      if (activeTab === 'env') {
+        previewTitle.textContent = '.env';
+        previewContent.textContent = envContent;
+        previewContent.className = 'text-sm font-mono whitespace-pre-wrap leading-relaxed text-[#cdd6f4]';
+        lblDownloadDesktop.textContent = 'Baixar .env';
+      } else {
+        previewTitle.textContent = 'terminal';
+        previewContent.textContent = '$ ' + cliContent;
+        previewContent.className = 'text-sm font-mono whitespace-pre-wrap leading-relaxed text-[#a6e3a1]';
+        lblDownloadDesktop.textContent = 'Baixar .sh';
+      }
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      if (tab === 'env') {
+        viewEnv.classList.remove('hidden');
+        viewCli.classList.add('hidden');
+        tabEnv.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all bg-slate-800 text-white shadow-sm ring-1 ring-slate-700';
+        tabCli.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
+      } else {
+        viewCli.classList.remove('hidden');
+        viewEnv.classList.add('hidden');
+        tabCli.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all bg-slate-800 text-white shadow-sm ring-1 ring-slate-700';
+        tabEnv.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
+      }
+      renderPreview();
+    }
+
+    tabEnv.addEventListener('click', () => switchTab('env'));
+    tabCli.addEventListener('click', () => switchTab('cli'));
+
+    document.querySelectorAll('[data-form="env"]').forEach(el => {
+      el.addEventListener('input', (e) => {
+        formData[e.target.name] = e.target.value;
+        updateEnvContent();
+      });
+    });
+
+    document.querySelectorAll('[data-form="cli"]').forEach(el => {
+      el.addEventListener('input', (e) => {
+        if (e.target.type === 'checkbox') {
+          cliData[e.target.name] = e.target.checked;
+        } else {
+          cliData[e.target.name] = e.target.value;
+        }
+        updateCliContent();
+      });
+    });
+
+    function handleCopy() {
+      const textToCopy = activeTab === 'env' ? envContent : cliContent;
+      const el = document.createElement('textarea');
+      el.value = textToCopy;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      document.getElementById('icon-copy-desktop').classList.add('hidden');
+      document.getElementById('icon-check-desktop').classList.remove('hidden');
+      document.getElementById('icon-copy-mobile').classList.add('hidden');
+      document.getElementById('icon-check-mobile').classList.remove('hidden');
+
+      setTimeout(() => {
+        document.getElementById('icon-copy-desktop').classList.remove('hidden');
+        document.getElementById('icon-check-desktop').classList.add('hidden');
+        document.getElementById('icon-copy-mobile').classList.remove('hidden');
+        document.getElementById('icon-check-mobile').classList.add('hidden');
+      }, 2000);
+    }
+
+    function handleDownload() {
+      let content, filename;
+      if (activeTab === 'cli') {
+        content = '#!/bin/bash\n\n' + cliContent + '\n';
+        filename = 'start-openclaw.sh';
+      } else {
+        content = envContent;
+        filename = '.env';
+      }
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('btn-copy-desktop').addEventListener('click', handleCopy);
+    document.getElementById('btn-copy-mobile').addEventListener('click', handleCopy);
+    document.getElementById('btn-download-desktop').addEventListener('click', handleDownload);
+    document.getElementById('btn-download-mobile').addEventListener('click', handleDownload);
+
+    updateEnvContent();
+    updateCliContent();
+  </script>
+</body>
+</html>

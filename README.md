@@ -58,6 +58,31 @@ openclaw security audit
 openclaw security audit --deep
 ```
 
+## 📱 Termux (Android)
+
+Run OpenClaw on your Android device via [Termux](https://termux.dev/):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-js/main/install-termux.sh | bash
+```
+
+**One-line installer** — sets up Node.js, clones the repo, installs dependencies, and configures for mobile.
+
+After install:
+```bash
+# Edit your API keys
+nano ~/openclaw-js/.env
+
+# Start OpenClaw
+openclaw
+```
+
+> **Termux Notes:**
+> - Browser automation is disabled (no Chrome on Android)
+> - Gateway binds to `0.0.0.0` for network access
+> - Use `termux-wake-lock` to keep running in background
+> - Add to Termux:Widget for home screen shortcuts
+
 ## Supported Channels
 
 ### WhatsApp
