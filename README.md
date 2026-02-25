@@ -1,6 +1,6 @@
 # 🦞 OpenClaw JS — Personal AI Assistant
 
-> Your own personal AI assistant. Any OS. Any Platform. Security-hardened. The lobster way. 🦞
+> Your own personal AI assistant. Any OS. Any Platform. Security-hardened. The lobster way. 🦞 [HARD-FORKED FROM OPENCLAW]
 
 [![Version](https://img.shields.io/badge/version-2026.2.14-blue.svg)](https://github.com/openclaw/openclaw)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
