@@ -1,0 +1,63 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node modules (serão instalados no build)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (será gerado no container)
+dist
+build
+
+# Testes
+test
+*.test.ts
+*.spec.ts
+coverage
+.nyc_output
+
+# Ambiente e configurações locais
+.env
+.env.local
+.env.*.local
+config.json
+
+# IDE e editores
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Documentação
+README.md
+CHANGELOG.md
+LICENSE
+docs
+
+# Docker files (não precisam estar na imagem)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Outros
+*.md
+.editorconfig
+.eslintrc*
+.prettierrc*
+tsconfig.*.json
+vitest.config.ts

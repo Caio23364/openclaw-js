@@ -1,0 +1,131 @@
+# OpenClaw JS - Docker Compose
+# Configuração para rodar o OpenClaw em containers
+
+services:
+  openclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: openclaw-js:latest
+    container_name: openclaw
+    restart: unless-stopped
+    
+    # Portas expostas
+    ports:
+      - "${GATEWAY_PORT:-18789}:18789"
+    
+    # Variáveis de ambiente
+    environment:
+      # Node
+      - NODE_ENV=production
+      
+      # AI Providers (preencha no .env ou aqui)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - ZHIPU_API_KEY=${ZHIPU_API_KEY:-}
+      - MOONSHOT_API_KEY=${MOONSHOT_API_KEY:-}
+      - QWEN_API_KEY=${QWEN_API_KEY:-}
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
+      - CEREBRAS_API_KEY=${CEREBRAS_API_KEY:-}
+      - VOLCENGINE_API_KEY=${VOLCENGINE_API_KEY:-}
+      
+      # Local Providers
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-}
+      - VLLM_BASE_URL=${VLLM_BASE_URL:-}
+      - LLAMACPP_BASE_URL=${LLAMACPP_BASE_URL:-}
+      - OSAURUS_BASE_URL=${OSAURUS_BASE_URL:-}
+      
+      # Channel Tokens
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN:-}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID:-}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET:-}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET:-}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN:-}
+      - MATRIX_HOMESERVER_URL=${MATRIX_HOMESERVER_URL:-https://matrix.org}
+      - MATRIX_ACCESS_TOKEN=${MATRIX_ACCESS_TOKEN:-}
+      - MATRIX_USER_ID=${MATRIX_USER_ID:-}
+      - SIGNAL_PHONE_NUMBER=${SIGNAL_PHONE_NUMBER:-}
+      - SIGNAL_CLI_PATH=${SIGNAL_CLI_PATH:-/usr/bin/signal-cli}
+      
+      # Gateway Configuration
+      - GATEWAY_PORT=18789
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_AUTH_MODE=${GATEWAY_AUTH_MODE:-token}
+      - GATEWAY_JWT_SECRET=${GATEWAY_JWT_SECRET:-}
+      
+      # Features
+      - ENABLE_BROWSER=${ENABLE_BROWSER:-true}
+      - ENABLE_CRON=${ENABLE_CRON:-true}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Memory
+      - MEMORY_BACKEND=${MEMORY_BACKEND:-markdown}
+      
+      # Browser Computer-Use
+      - COMPUTER_USE_ENDPOINT=${COMPUTER_USE_ENDPOINT:-}
+      
+      # Puppeteer
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    
+    # Volumes para persistência
+    volumes:
+      # Configurações e estado
+      - openclaw-data:/app/.openclaw
+      # Sincronizar hora com host (útil para tokens)
+      - /etc/localtime:/etc/localtime:ro
+    
+    # Configurações de logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Serviço opcional: Ollama para modelos locais
+  # Descomente se quiser rodar Ollama junto
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: openclaw-ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-data:/root/.ollama
+  #   # GPU support (descomente se tiver GPU)
+  #   # deploy:
+  #   #   resources:
+  #   #     reservations:
+  #   #       devices:
+  #   #         - driver: nvidia
+  #   #           count: 1
+  #   #           capabilities: [gpu]
+
+# Volumes nomeados
+volumes:
+  openclaw-data:
+    driver: local
+  # ollama-data:
+  #   driver: local
+
+# Network (opcional, para isolar comunicação)
+networks:
+  default:
+    name: openclaw-network
