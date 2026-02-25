@@ -2,7 +2,15 @@
  * OpenClaw - Vendor Registry
  * Central registry of all supported AI vendors.
  * Most vendors use the OpenAI-compatible protocol and share the OpenAI provider.
+ * Supports dynamic custom providers via CUSTOM_PROVIDERS env variable.
  */
+
+import { 
+  loadCustomProviders, 
+  getCustomProviderApiKey,
+  buildCustomVendorConfig,
+  type CustomProviderConfig 
+} from './custom-providers.js';
 
 export type VendorProtocol = 'openai' | 'anthropic' | 'google';
 
@@ -227,4 +235,89 @@ export function getLocalVendors(): VendorConfig[] {
     return Object.values(VENDOR_REGISTRY).filter((v) => !v.requiresKey);
 }
 
+// ============================================================================
+// Custom Provider Support
+// ============================================================================
+
+/**
+ * Get the merged registry including both built-in and custom providers.
+ * Custom providers are loaded dynamically from environment variables.
+ */
+export function getMergedRegistry(): Record<string, VendorConfig | CustomProviderConfig> {
+    const customProviders = loadCustomProviders();
+    return { ...VENDOR_REGISTRY, ...customProviders };
+}
+
+/**
+ * Parse a model string with support for custom providers.
+ * E.g., "myprovider/gpt-4" where "myprovider" is a custom provider.
+ */
+export function parseModelStringWithCustom(modelString: string): { 
+    vendor: string; 
+    model: string;
+    isCustom: boolean;
+} {
+    const slashIndex = modelString.indexOf('/');
+    if (slashIndex === -1) {
+        return { vendor: 'openai', model: modelString, isCustom: false };
+    }
+
+    const vendor = modelString.slice(0, slashIndex).toLowerCase();
+    const model = modelString.slice(slashIndex + 1);
+
+    // Check built-in registry first
+    if (VENDOR_REGISTRY[vendor]) {
+        return { vendor, model, isCustom: false };
+    }
+
+    // Check custom providers
+    const customProviders = loadCustomProviders();
+    if (customProviders[vendor]) {
+        return { vendor, model, isCustom: true };
+    }
+
+    // Unknown vendor — treat the whole string as a model on openai
+    return { vendor: 'openai', model: modelString, isCustom: false };
+}
+
+/**
+ * Get vendor configuration by prefix, including custom providers.
+ */
+export function getVendorConfigWithCustom(prefix: string): VendorConfig | CustomProviderConfig | undefined {
+    const upperPrefix = prefix.toLowerCase();
+    
+    // Check built-in first
+    if (VENDOR_REGISTRY[upperPrefix]) {
+        return VENDOR_REGISTRY[upperPrefix];
+    }
+    
+    // Check custom providers
+    return buildCustomVendorConfig(upperPrefix) || undefined;
+}
+
+/**
+ * Get all registered vendor prefixes including custom providers.
+ */
+export function getAllVendorPrefixes(): string[] {
+    const customProviders = loadCustomProviders();
+    return [...Object.keys(VENDOR_REGISTRY), ...Object.keys(customProviders)];
+}
+
+/**
+ * Get API key for a vendor (built-in or custom).
+ */
+export function getVendorApiKey(prefix: string): string | undefined {
+    const lowerPrefix = prefix.toLowerCase();
+    
+    // Check built-in vendor
+    const builtIn = VENDOR_REGISTRY[lowerPrefix];
+    if (builtIn?.envVar) {
+        return process.env[builtIn.envVar];
+    }
+    
+    // Check custom provider
+    return getCustomProviderApiKey(lowerPrefix);
+}
+
 export default VENDOR_REGISTRY;
+export { loadCustomProviders, getCustomProviderApiKey };

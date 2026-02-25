@@ -169,6 +169,47 @@ O WhatsApp reescaneamento de QR code a cada reinicialização. Para persistir a 
 # Apenas não remova o volume entre reinicializações
 ```
 
+### Custom Providers (OpenAI-Compatible)
+
+Para usar providers customizados com Docker, adicione ao seu `.env`:
+
+```bash
+# Defina os prefixes dos providers customizados
+CUSTOM_PROVIDERS=together,fireworks
+
+# Configure cada provider
+TOGETHER_NAME="Together AI"
+TOGETHER_BASE_URL=https://api.together.xyz/v1
+TOGETHER_API_KEY=sua-chave-aqui
+
+FIREWORKS_NAME="Fireworks AI"
+FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
+FIREWORKS_API_KEY=sua-chave-aqui
+```
+
+Ou passe diretamente no `docker run`:
+
+```bash
+docker run -d \
+  --name openclaw \
+  -p 18789:18789 \
+  -e CUSTOM_PROVIDERS=together \
+  -e TOGETHER_NAME="Together AI" \
+  -e TOGETHER_BASE_URL=https://api.together.xyz/v1 \
+  -e TOGETHER_API_KEY=sua-chave \
+  -v openclaw-data:/app/.openclaw \
+  openclaw-js:latest
+```
+
+Uso após configurar:
+```bash
+# Via CLI
+openclaw agent -m "Hello" --model together/llama-3.1-70b
+
+# Ou no chat
+/model together/llama-3.1-70b
+```
+
 ## 🔒 Segurança
 
 - O container roda como usuário não-root (`nodejs`)

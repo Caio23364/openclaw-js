@@ -505,7 +505,104 @@ npx vitest run --reporter=verbose
 
 ---
 
-## 13. Docker Deployment
+## 13. Custom Providers (OpenAI-Compatible)
+
+OpenClaw JS supports adding custom OpenAI-compatible providers dynamically via environment variables. This allows you to use any provider that implements the OpenAI API protocol (v1) without modifying code.
+
+### Configuration Format
+
+```bash
+# List your custom provider prefixes (comma-separated)
+CUSTOM_PROVIDERS=together,fireworks,perplexity
+
+# For each prefix, define:
+<prefix>_NAME="Display Name"           # Human-readable name
+<prefix>_BASE_URL="https://api..."     # API base URL (required)
+<prefix>_API_KEY="your-key"            # API key (optional)
+<prefix>_MODELS="model1,model2"        # Supported models (optional)
+```
+
+### Examples
+
+**Together AI:**
+```bash
+CUSTOM_PROVIDERS=together
+TOGETHER_NAME="Together AI"
+TOGETHER_BASE_URL=https://api.together.xyz/v1
+TOGETHER_API_KEY=your-together-key
+```
+
+**Fireworks AI:**
+```bash
+CUSTOM_PROVIDERS=fireworks
+FIREWORKS_NAME="Fireworks AI"
+FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
+FIREWORKS_API_KEY=your-fireworks-key
+```
+
+**Perplexity:**
+```bash
+CUSTOM_PROVIDERS=perplexity
+PERPLEXITY_NAME="Perplexity"
+PERPLEXITY_BASE_URL=https://api.perplexity.ai
+PERPLEXITY_API_KEY=your-perplexity-key
+```
+
+**Multiple providers:**
+```bash
+CUSTOM_PROVIDERS=together,fireworks,perplexity
+
+# Together AI
+TOGETHER_NAME="Together AI"
+TOGETHER_BASE_URL=https://api.together.xyz/v1
+TOGETHER_API_KEY=tgp_v1_...
+
+# Fireworks AI
+FIREWORKS_NAME="Fireworks AI"
+FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
+FIREWORKS_API_KEY=f1_...
+
+# Perplexity
+PERPLEXITY_NAME="Perplexity"
+PERPLEXITY_BASE_URL=https://api.perplexity.ai
+PERPLEXITY_API_KEY=pplx-...
+```
+
+### Usage
+
+Once configured, use the custom provider with the prefix notation:
+
+```bash
+# CLI
+openclaw agent -m "Hello" --model together/llama-3.1-70b
+
+# Or in chat
+/model together/llama-3.1-70b
+```
+
+### Supported Providers
+
+Any provider implementing the OpenAI API v1 protocol:
+
+- **Together AI** (together.xyz)
+- **Fireworks AI** (fireworks.ai)
+- **Perplexity** (perplexity.ai)
+- **Anyscale** (anyscale.com)
+- **Baseten** (baseten.co)
+- **Replicate** (replicate.com)
+- **OctoAI** (octo.ai)
+- **Your own self-hosted models** (vLLM, llama.cpp, etc.)
+
+### Implementation Details
+
+- Custom providers use the same `OpenAIProvider` class as built-in OpenAI-compatible vendors
+- They are lazy-loaded on first use or during ProviderManager initialization
+- Custom providers appear in status endpoints with `isCustom: true`
+- API keys can be provided via environment variables or config file
+
+---
+
+## 14. Docker Deployment
 
 The project includes full Docker support with multi-stage builds.
 

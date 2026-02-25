@@ -8,7 +8,20 @@
 import { Provider, ProviderType, Message, Tool, ToolCall } from '../types/index.js';
 import { log } from '../utils/logger.js';
 import { getConfig } from '../utils/config.js';
-import { VENDOR_REGISTRY, parseModelString, getVendorConfig, type VendorConfig } from './vendors.js';
+import { 
+  VENDOR_REGISTRY, 
+  parseModelString, 
+  getVendorConfig, 
+  type VendorConfig,
+  getAllVendorPrefixes,
+  getVendorConfigWithCustom,
+  getVendorApiKey,
+} from './vendors.js';
+import { 
+  loadCustomProviders, 
+  isCustomProvider,
+  type CustomProviderConfig 
+} from './custom-providers.js';
 
 // Lazy provider type — resolved at runtime
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +65,50 @@ export class ProviderManager {
       }
     }
 
+    // Initialize custom providers from environment
+    await this.initializeCustomProviders();
+
     log.info(`Initialized ${this.providers.size} providers (lazy-loaded)`);
+  }
+
+  /**
+   * Initialize custom providers defined via CUSTOM_PROVIDERS environment variable.
+   */
+  private async initializeCustomProviders(): Promise<void> {
+    const customProviders = loadCustomProviders();
+    
+    for (const [prefix, config] of Object.entries(customProviders)) {
+      // Skip if already initialized (shouldn't happen, but safety check)
+      if (this.providers.has(prefix)) {
+        continue;
+      }
+
+      const providerConf = this.config[prefix];
+      const apiKey = providerConf?.apiKey || getVendorApiKey(prefix);
+
+      if (!apiKey && config.requiresKey) {
+        log.warn(`Custom provider "${prefix}" requires API key but none found`);
+        continue;
+      }
+
+      try {
+        const { OpenAIProvider } = await import('./openai.js');
+        const provider = new OpenAIProvider({
+          apiKey: apiKey || 'dummy',
+          baseUrl: providerConf?.baseUrl || config.baseUrl,
+          ...providerConf,
+        });
+        
+        // Override display metadata
+        provider.id = prefix;
+        provider.name = config.name;
+        
+        this.providers.set(prefix, provider);
+        log.info(`Custom provider "${config.name}" initialized (${prefix})`);
+      } catch (error) {
+        log.error(`Failed to initialize custom provider "${prefix}":`, error);
+      }
+    }
   }
 
   /**
@@ -126,6 +182,24 @@ export class ProviderManager {
       return this.providers.get(type);
     }
 
+    // Check if it's a custom provider
+    if (isCustomProvider(type)) {
+      const customConfig = getVendorConfigWithCustom(type);
+      if (customConfig) {
+        const { OpenAIProvider } = await import('./openai.js');
+        const provider = new OpenAIProvider({
+          apiKey: config.apiKey || getVendorApiKey(type) || 'dummy',
+          baseUrl: config.baseUrl || customConfig.baseUrl,
+          ...config,
+        });
+        provider.id = type;
+        provider.name = customConfig.name;
+        this.providers.set(type, provider);
+        log.info(`Custom provider "${type}" added dynamically`);
+        return provider;
+      }
+    }
+
     // Fallback for unknown types — try OpenAI-compatible
     const { OpenAIProvider } = await import('./openai.js');
     const provider = new OpenAIProvider(config);
@@ -163,6 +237,7 @@ export class ProviderManager {
   /**
    * Chat using a model string with vendor prefix.
    * E.g., "deepseek/deepseek-chat", "groq/llama-3.1-70b-versatile", "gpt-4o"
+   * Also supports custom providers: "myprovider/model-name"
    */
   public async chatWithModel(
     modelString: string,
@@ -191,6 +266,33 @@ export class ProviderManager {
       }
     }
 
+    // Try to auto-initialize custom provider
+    if (!provider && isCustomProvider(vendor)) {
+      const customConfig = getVendorConfigWithCustom(vendor);
+      if (customConfig) {
+        const apiKey = getVendorApiKey(vendor);
+        if (apiKey || !customConfig.requiresKey) {
+          try {
+            const { OpenAIProvider } = await import('./openai.js');
+            const newProvider = new OpenAIProvider({
+              apiKey: apiKey || 'dummy',
+              baseUrl: customConfig.baseUrl,
+              timeout: 60000,
+              maxRetries: 3,
+              rateLimit: { requestsPerMinute: 100, tokensPerMinute: 100000, concurrentRequests: 10 },
+            });
+            newProvider.id = vendor;
+            newProvider.name = customConfig.name;
+            this.providers.set(vendor, newProvider);
+            provider = newProvider;
+            log.info(`Auto-initialized custom provider: ${customConfig.name}`);
+          } catch (error) {
+            log.error(`Failed to auto-initialize custom provider "${vendor}":`, error);
+          }
+        }
+      }
+    }
+
     if (!provider) {
       throw new Error(`Provider not found for vendor "${vendor}". Configure an API key or use a supported vendor prefix.`);
     }
@@ -200,6 +302,7 @@ export class ProviderManager {
 
   /**
    * Stream chat using a model string with vendor prefix.
+   * Also supports custom providers.
    */
   public async *streamWithModel(
     modelString: string,
@@ -213,7 +316,35 @@ export class ProviderManager {
   ): AsyncGenerator<{ type: 'content' | 'tool_call'; data: string | ToolCall }> {
     const { vendor, model } = parseModelString(modelString);
 
-    const provider = this.providers.get(vendor);
+    let provider = this.providers.get(vendor);
+
+    // Auto-initialize custom provider if needed
+    if (!provider && isCustomProvider(vendor)) {
+      const customConfig = getVendorConfigWithCustom(vendor);
+      if (customConfig) {
+        const apiKey = getVendorApiKey(vendor);
+        if (apiKey || !customConfig.requiresKey) {
+          try {
+            const { OpenAIProvider } = await import('./openai.js');
+            const newProvider = new OpenAIProvider({
+              apiKey: apiKey || 'dummy',
+              baseUrl: customConfig.baseUrl,
+              timeout: 60000,
+              maxRetries: 3,
+              rateLimit: { requestsPerMinute: 100, tokensPerMinute: 100000, concurrentRequests: 10 },
+            });
+            newProvider.id = vendor;
+            newProvider.name = customConfig.name;
+            this.providers.set(vendor, newProvider);
+            provider = newProvider;
+            log.info(`Auto-initialized custom provider for streaming: ${customConfig.name}`);
+          } catch (error) {
+            log.error(`Failed to auto-initialize custom provider "${vendor}":`, error);
+          }
+        }
+      }
+    }
+
     if (!provider) {
       throw new Error(`Provider not found for vendor "${vendor}".`);
     }
@@ -278,12 +409,15 @@ export class ProviderManager {
     const status: Record<string, any> = {};
     for (const [type, provider] of this.providers) {
       const vendorConfig = getVendorConfig(type);
+      const customConfig = isCustomProvider(type) ? getVendorConfigWithCustom(type) : null;
+      
       status[type] = {
-        name: vendorConfig?.name || type,
+        name: vendorConfig?.name || customConfig?.name || type,
         available: provider.status?.available ?? true,
         lastChecked: provider.status?.lastChecked,
         error: provider.status?.error,
-        protocol: vendorConfig?.protocol || 'unknown',
+        protocol: vendorConfig?.protocol || customConfig?.protocol || 'openai',
+        isCustom: !!customConfig,
       };
     }
     return status;
@@ -291,14 +425,27 @@ export class ProviderManager {
 
   /**
    * Get a summary of all registered vendors (loaded or not).
+   * Includes both built-in and custom providers.
    */
-  public getVendorSummary(): { prefix: string; name: string; loaded: boolean; requiresKey: boolean }[] {
-    return Object.entries(VENDOR_REGISTRY).map(([prefix, config]) => ({
+  public getVendorSummary(): { prefix: string; name: string; loaded: boolean; requiresKey: boolean; isCustom: boolean }[] {
+    const builtIn = Object.entries(VENDOR_REGISTRY).map(([prefix, config]) => ({
       prefix,
       name: config.name,
       loaded: this.providers.has(prefix),
       requiresKey: config.requiresKey,
+      isCustom: false,
     }));
+
+    const customProviders = loadCustomProviders();
+    const custom = Object.entries(customProviders).map(([prefix, config]) => ({
+      prefix,
+      name: config.name,
+      loaded: this.providers.has(prefix),
+      requiresKey: config.requiresKey,
+      isCustom: true,
+    }));
+
+    return [...builtIn, ...custom];
   }
 }
 
@@ -318,6 +465,19 @@ export async function createProviderManager(): Promise<ProviderManager> {
   return providerManager;
 }
 
-export { VENDOR_REGISTRY, parseModelString, getVendorConfig } from './vendors.js';
+export { 
+  VENDOR_REGISTRY, 
+  parseModelString, 
+  getVendorConfig,
+  getAllVendorPrefixes,
+  getVendorConfigWithCustom,
+  getVendorApiKey,
+} from './vendors.js';
+export { 
+  loadCustomProviders, 
+  isCustomProvider,
+  validateCustomProviders,
+  type CustomProviderConfig,
+} from './custom-providers.js';
 
 export default ProviderManager;

@@ -71,6 +71,11 @@ services:
       # Browser Computer-Use
       - COMPUTER_USE_ENDPOINT=${COMPUTER_USE_ENDPOINT:-}
       
+      # Custom Providers (OpenAI-Compatible)
+      - CUSTOM_PROVIDERS=${CUSTOM_PROVIDERS:-}
+      # Exemplo: CUSTOM_PROVIDERS=together,fireworks,perplexity
+      # Cada provider precisa de: <PREFIX>_NAME, <PREFIX>_BASE_URL, <PREFIX>_API_KEY (opcional)
+      
       # Puppeteer
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
