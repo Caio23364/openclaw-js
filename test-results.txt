@@ -1,0 +1,84 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/openclaw-js (1)/openclaw-js[39m
+
+ [32mÔ£ô[39m test/browser.test.ts[2m > [22mBrowserManager[2m > [22mlaunchBrowser[2m > [22mcreates a new browser and returns its ID[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m test/browser.test.ts[2m > [22mBrowserManager[2m > [22mlaunchBrowser[2m > [22mtracks the browser in sessions[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/browser.test.ts[2m > [22mBrowserManager[2m > [22mcloseAll[2m > [22mcloses all browsers and clears sessions[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/browser.test.ts[2m > [22mBrowserManager[2m > [22mcloseAll[2m > [22mhandles individual close errors gracefully[32m 4[2mms[22m[39m
+ [32mÔ£ô[39m test/browser.test.ts[2m > [22mBrowserManager[2m > [22mnavigate[2m > [22mnavigates browser to URL[32m 4[2mms[22m[39m
+ [32mÔ£ô[39m test/browser.test.ts[2m > [22mBrowserManager[2m > [22mnavigate[2m > [22mthrows for unknown browser ID[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22minitialize[2m > [22minitializes providers with valid API keys[32m 5[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22minitialize[2m > [22mskips providers without API keys[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22minitialize[2m > [22mreturns correct provider count[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22mcheckAvailability[2m > [22mreturns availability for all providers[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22mcheckAvailability[2m > [22mruns checks in parallel (not sequential)[32m 61[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22mcheckAvailability[2m > [22mhandles provider errors gracefully (returns false)[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22mgetStatus[2m > [22mreturns status for all initialized providers[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/providers.test.ts[2m > [22mProviderManager[2m > [22mcreateProviderManager (factory)[2m > [22mreturns an initialized ProviderManager[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mensureDirectories[2m > [22mcreates all required directories with recursive flag[32m 62[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mloadConfig[2m > [22mreturns default config when file does not exist (ENOENT)[32m 11[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mloadConfig[2m > [22mmerges file config with defaults[32m 11[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mloadConfig[2m > [22mcaches config on subsequent calls (no extra disk reads)[32m 10[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mloadConfig[2m > [22mreturns defaults on parse error[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mgetConfig[2m > [22mreturns cached config after loadConfig[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22msaveConfig[2m > [22mwrites JSON to disk with formatting[32m 30[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mexported constants[2m > [22mCONFIG_DIR points to ~/.openclaw[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m test/config.test.ts[2m > [22mconfig.ts[2m > [22mexported constants[2m > [22mSTATE_DIR is inside CONFIG_DIR[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgenerateId[2m > [22mreturns a valid UUID v4[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgenerateId[2m > [22mgenerates unique IDs[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgenerateShortId[2m > [22mreturns default length of 8[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgenerateShortId[2m > [22mrespects custom length[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgenerateShortId[2m > [22monly contains alphanumeric characters[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgenerateShortId[2m > [22mgenerates unique values[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgeneratePairingCode[2m > [22mreturns length of 6[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgeneratePairingCode[2m > [22mexcludes ambiguous characters (O, 0, I, 1)[32m 8[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mgeneratePairingCode[2m > [22monly contains uppercase letters and digits[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mhashString[2m > [22mreturns a 64-char hex string (SHA-256)[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mhashString[2m > [22mis deterministic[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mhashString[2m > [22mdiffers for different inputs[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22msleep[2m > [22mresolves after the given ms[32m 53[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mdebounce[2m > [22monly calls fn after delay elapses[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mdebounce[2m > [22mresets delay on rapid calls[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mthrottle[2m > [22mcalls fn immediately on first call[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mthrottle[2m > [22mignores calls within the throttle window[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mthrottle[2m > [22mallows a new call after the window expires[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatBytes[2m > [22mhandles 0[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatBytes[2m > [22mformats bytes[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatBytes[2m > [22mformats KB[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatBytes[2m > [22mformats MB[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatBytes[2m > [22mformats GB[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatBytes[2m > [22mrespects decimal places[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatDuration[2m > [22mformats milliseconds[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatDuration[2m > [22mformats seconds[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatDuration[2m > [22mformats minutes[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mformatDuration[2m > [22mformats hours[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mtruncate[2m > [22mreturns short strings unchanged[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mtruncate[2m > [22mtruncates long strings with ellipsis[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mtruncate[2m > [22mhandles exact boundary[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22msanitizeFilename[2m > [22mreplaces special chars with _[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22msanitizeFilename[2m > [22mkeeps safe characters[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mparseMentions[2m > [22mextracts @mentions from text[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mparseMentions[2m > [22mreturns empty array when no mentions[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mextractUrls[2m > [22mextracts URLs from text[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mextractUrls[2m > [22mreturns empty array when no URLs[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22misValidEmail[2m > [22maccepts valid emails[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22misValidEmail[2m > [22mrejects invalid emails[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22misValidPhone[2m > [22maccepts valid phone numbers[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22misValidPhone[2m > [22mrejects invalid phones[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mmaskString[2m > [22mmasks the middle of long strings[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mmaskString[2m > [22mfully masks short strings[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mdeepClone[2m > [22mcreates a separate copy[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mdeepClone[2m > [22mhandles arrays[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mdeepClone[2m > [22mhandles Dates[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mmergeObjects[2m > [22mmerges source into target[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mmergeObjects[2m > [22mdoes not mutate the original[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mpick[2m > [22mpicks specified keys[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22mpick[2m > [22mignores missing keys[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22momit[2m > [22momits specified keys[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m test/helpers.test.ts[2m > [22momit[2m > [22mdoes not mutate the original[32m 1[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m75 passed[39m[22m[90m (75)[39m
+[2m   Start at [22m 12:43:21
+[2m   Duration [22m 1.73s[2m (transform 422ms, setup 0ms, collect 877ms, tests 351ms, environment 1ms, prepare 1.99s)[22m
+
