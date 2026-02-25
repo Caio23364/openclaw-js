@@ -4,9 +4,38 @@ Guia completo para rodar o OpenClaw JS em Docker.
 
 ## 📋 Pré-requisitos
 
-- Docker Engine 24.0+
+- Docker Engine 24.0+ (com Buildx para multi-plataforma)
 - Docker Compose 2.0+ (opcional, mas recomendado)
 - Pelo menos 2GB de RAM disponível
+- **Suporte a arquiteturas**: AMD64 (x86_64) e ARM64 (Apple Silicon, Raspberry Pi, AWS Graviton)
+
+## 🖥️ Suporte a Arquiteturas
+
+O OpenClaw JS suporta as seguintes arquiteturas:
+
+| Arquitetura | Plataformas | Status |
+|-------------|-------------|--------|
+| `linux/amd64` | Intel, AMD tradicional, servidores cloud | ✅ Suportado |
+| `linux/arm64` | Apple Silicon (M1/M2/M3), Raspberry Pi 4/5, AWS Graviton | ✅ Suportado |
+
+### Apple Silicon (M1/M2/M3/M4)
+
+O Docker Desktop para Mac com Apple Silicon usa automaticamente a imagem ARM64:
+
+```bash
+# O Docker irá automaticamente usar a imagem ARM64 se disponível
+docker-compose up -d
+
+# Ou force explicitamente
+docker run -d --platform linux/arm64 --name openclaw -p 18789:18789 openclaw-js:latest
+```
+
+### Raspberry Pi (4/5 com 64-bit OS)
+
+```bash
+# Raspberry Pi OS 64-bit ou Ubuntu ARM64
+docker run -d --platform linux/arm64 --name openclaw -p 18789:18789 openclaw-js:latest
+```
 
 ## 🚀 Quick Start
 
@@ -133,18 +162,69 @@ docker rm openclaw
 
 ## 🛠️ Build Manual
 
+### Build Simples (Arquitetura Nativa)
+
 ```bash
 # Build simples
 docker build -t openclaw-js .
 
+# Build com script interativo
+./docker-build.sh
+
 # Build com tag específica
 ./docker-build.sh v2026.2.14
+```
 
-# Build multi-plataforma (amd64 + arm64)
+### Build Multi-Plataforma (AMD64 + ARM64)
+
+```bash
+# Usando docker-bake.hcl (recomendado)
+docker buildx bake
+
+# Build manual multi-plataforma
+# Nota: requer docker buildx com driver docker-container ou similar
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
+  --target production \
   -t openclaw-js:latest \
   --push .
+
+# Build específico para ARM64 (Apple Silicon, Raspberry Pi)
+docker buildx build \
+  --platform linux/arm64 \
+  --target production \
+  -t openclaw-js:latest \
+  --load .
+
+# Build específico para AMD64 (Intel/AMD tradicional)
+docker buildx build \
+  --platform linux/amd64 \
+  --target production \
+  -t openclaw-js:latest \
+  --load .
+```
+
+### Usando Docker Compose com Buildx
+
+```bash
+# Configurar builder multi-plataforma (primeira vez)
+docker buildx create --use --name multiplatform-builder
+
+# Build e push para registry
+docker buildx bake --push
+
+# Build apenas local
+docker-compose build
+```
+
+### Verificando a Arquitetura da Imagem
+
+```bash
+# Verificar arquitetura da imagem construída
+docker inspect openclaw-js:latest | grep Architecture
+
+# Ver todas as plataformas disponíveis (imagem multi-arch)
+docker manifest inspect openclaw-js:latest
 ```
 
 ## 🌐 Conectando a Serviços Externos

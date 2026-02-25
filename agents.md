@@ -604,7 +604,16 @@ Any provider implementing the OpenAI API v1 protocol:
 
 ## 14. Docker Deployment
 
-The project includes full Docker support with multi-stage builds.
+The project includes full Docker support with multi-stage builds and multi-platform support.
+
+### Platform Support
+
+| Platform | Architecture | Notes |
+|----------|-------------|-------|
+| Linux | AMD64 (x86_64) | Standard servers, Intel/AMD CPUs |
+| Linux | ARM64 (aarch64) | Apple Silicon (M1/M2/M3/M4), Raspberry Pi 4/5, AWS Graviton |
+| macOS | AMD64 | Intel Macs via Docker Desktop |
+| macOS | ARM64 | Apple Silicon Macs via Docker Desktop (native) |
 
 ### Quick Start with Docker
 
@@ -666,6 +675,44 @@ OLLAMA_BASE_URL=http://host.docker.internal:11434/v1
 
 **Ollama in Docker Compose**:
 Uncomment the `ollama` service in `docker-compose.yml`.
+
+### Multi-Platform Builds
+
+Build for multiple architectures using Docker Buildx:
+
+```bash
+# Build for current architecture only
+docker build -t openclaw-js .
+
+# Build for specific platform
+docker buildx build --platform linux/arm64 -t openclaw-js .
+
+# Build for multiple platforms (requires registry push)
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t username/openclaw-js:latest \
+  --push .
+
+# Using docker-bake.hcl
+docker buildx bake
+```
+
+### Apple Silicon (M1/M2/M3/M4) Notes
+
+On Apple Silicon Macs, Docker Desktop automatically runs ARM64 containers natively:
+
+```bash
+# No special flags needed - Docker auto-detects
+docker-compose up -d
+
+# Verify you're running ARM64 version
+docker exec openclaw uname -m  # Should print: aarch64
+```
+
+**Performance benefits:**
+- Native ARM64 execution (no Rosetta translation)
+- Lower memory usage
+- Better battery life on laptops
 
 ### Docker Commands Reference
 

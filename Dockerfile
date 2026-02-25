@@ -1,13 +1,22 @@
 # OpenClaw JS - Dockerfile
-# Multi-stage build para otimizar a imagem final
+# Multi-stage build com suporte multi-plataforma (AMD64, ARM64)
+# Compatível com: Linux AMD64, Linux ARM64, Apple Silicon (M1/M2/M3)
 
 # ============================================
 # Stage 1: Build
 # ============================================
-FROM node:22-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
+
+# Argumentos de build
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETARCH
+
+RUN echo "Building on $BUILDPLATFORM for $TARGETPLATFORM (arch: $TARGETARCH)"
 
 # Instalar dependências de build
-RUN apk add --no-cache python3 make g++
+# python3, make, g++ necessários para compilação de módulos nativos
+RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /app
 
@@ -16,7 +25,8 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Instalar TODAS as dependências (incluindo devDependencies)
-RUN npm ci
+# Forçar rebuild de módulos nativos para a arquitetura alvo
+RUN npm ci && npm cache clean --force
 
 # Copiar código fonte
 COPY src ./src
@@ -30,7 +40,10 @@ RUN npm run build
 # ============================================
 FROM node:22-alpine AS production
 
+ARG TARGETARCH
+
 # Instalar dependências para Puppeteer (Chromium)
+# As dependências variam ligeiramente entre AMD64 e ARM64
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -38,15 +51,21 @@ RUN apk add --no-cache \
     harfbuzz \
     ca-certificates \
     ttf-freefont \
-    # Dependências adicionais para Puppeteer
+    font-noto-emoji \
+    # Dependências adicionais para Puppeteer funcionar corretamente
     dumb-init \
     curl \
+    # Dependências adicionais para Alpine ARM64
+    $([ "$TARGETARCH" = "arm64" ] && echo "chromium-chromedriver" || echo "") \
     && rm -rf /var/cache/apk/*
 
 # Configurar Puppeteer para usar Chromium do Alpine
+# Nota: O path do Chromium pode variar entre arquiteturas
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    NODE_ENV=production
+    NODE_ENV=production \
+    # Desabilitar features de GPU que podem causar problemas em containers
+    PUPPETEER_ARGS="--no-sandbox,--disable-setuid-sandbox,--disable-gpu,--disable-dev-shm-usage"
 
 # Criar usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs && \
@@ -58,8 +77,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar apenas dependências de produção
-RUN npm ci --omit=dev && \
-    npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copiar arquivos compilados do stage de build
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist

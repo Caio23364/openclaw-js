@@ -7,7 +7,14 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
+      # Suporte multi-plataforma - descomente para forçar arquitetura específica
+      # platforms:
+      #   - "linux/amd64"
+      #   - "linux/arm64"
     image: openclaw-js:latest
+    # Plataforma - remova ou ajuste conforme necessário
+    # platform: linux/arm64  # Para Apple Silicon (M1/M2/M3)
+    # platform: linux/amd64  # Para Intel/AMD tradicional
     container_name: openclaw
     restart: unless-stopped
     
