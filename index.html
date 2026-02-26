@@ -3,350 +3,784 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenClaw Config</title>
+  <title>OpenClaw Configurator</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            claw: {
+              50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+              400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+              800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            slideUp: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .syntax-keyword { color: #c678dd; }
+    .syntax-string { color: #98c379; }
+    .syntax-comment { color: #5c6370; font-style: italic; }
+    .syntax-number { color: #d19a66; }
+    .syntax-boolean { color: #56b6c2; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    .section-enter { animation: slideUp 0.4s ease-out forwards; }
+  </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-indigo-500/30 pb-24 lg:pb-8">
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-sans selection:bg-claw-500/30 transition-colors duration-300">
 
-  <header class="bg-slate-900 shadow-sm border-b border-slate-800 sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
         <div class="flex items-center space-x-3">
-          <div class="bg-indigo-500 p-2 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          <div class="bg-gradient-to-br from-claw-500 to-claw-700 p-2 rounded-xl shadow-lg shadow-claw-500/20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/>
+            </svg>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-white leading-tight">OpenClaw Config</h1>
-            <p class="text-xs text-slate-400 font-medium">Gerador de configurações</p>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white leading-tight">OpenClaw</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Configurator v2026.2.14</p>
           </div>
         </div>
-        <div class="hidden lg:flex space-x-3">
-          <button id="btn-copy-desktop" class="flex items-center px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors">
-            <svg id="icon-copy-desktop" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-            <svg id="icon-check-desktop" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2 text-emerald-400 hidden"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Copiar</span>
+        <div class="flex items-center space-x-2">
+          <button id="btn-theme" class="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" title="Alternar tema">
+            <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
           </button>
-          <button id="btn-download-desktop" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-            <span id="lbl-download-desktop">Baixar .env</span>
+          <button id="btn-import" class="hidden sm:flex items-center px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+            Importar .env
+          </button>
+          <input type="file" id="file-input" accept=".env,.txt" class="hidden">
+          <div class="relative">
+            <button id="btn-export" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-claw-600 to-claw-700 rounded-lg hover:from-claw-700 hover:to-claw-800 transition-all shadow-lg shadow-claw-500/25">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              Exportar
+            </button>
+            <div id="export-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50">
+              <button data-export="env" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                .env file
+              </button>
+              <button data-export="docker" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                docker-compose.yml
+              </button>
+              <button data-export="systemd" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                systemd service
+              </button>
+              <button data-export="cli" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"/></svg>
+                start.sh script
+              </button>
+            </div>
+          </div>
+          <button id="btn-copy" class="p-2 rounded-lg text-slate-500 hover:text-claw-600 dark:text-slate-400 dark:hover:text-claw-400 hover:bg-claw-50 dark:hover:bg-claw-900/30 transition-all" title="Copiar">
+            <svg id="icon-copy" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <svg id="icon-check" class="w-5 h-5 text-emerald-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </button>
         </div>
-      </div>
-      
-      <div class="flex space-x-2 mt-6 bg-slate-950/50 p-1 rounded-xl w-full max-w-md overflow-hidden border border-slate-800">
-        <button id="tab-env" class="flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all bg-slate-800 text-white shadow-sm ring-1 ring-slate-700">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-          <span>Variáveis (.env)</span>
-        </button>
-        <button id="tab-cli" class="flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/></svg>
-          <span>Launch CLI</span>
-        </button>
       </div>
     </div>
   </header>
 
+  <!-- Main -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <div class="lg:col-span-7 space-y-6">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      <div class="xl:col-span-7 space-y-6">
         
-        <div id="view-env" class="space-y-6 block">
-          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
-              <h2 class="text-lg font-semibold text-white">Provedores de IA</h2>
-            </div>
-            <div class="p-6 space-y-5">
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Anthropic Claude (Recomendado)</label><input type="password" data-form="env" name="ANTHROPIC_API_KEY" placeholder="sk-ant-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">OpenAI</label><input type="password" data-form="env" name="OPENAI_API_KEY" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Google Gemini</label><input type="password" data-form="env" name="GOOGLE_API_KEY" placeholder="AIza..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">DeepSeek</label><input type="password" data-form="env" name="DEEPSEEK_API_KEY" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Groq</label><input type="password" data-form="env" name="GROQ_API_KEY" placeholder="gsk_..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">OpenRouter</label><input type="password" data-form="env" name="OPENROUTER_API_KEY" placeholder="sk-or-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
-              <h2 class="text-lg font-semibold text-white">Modelos Locais</h2>
-            </div>
-            <div class="p-6 space-y-5">
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Ollama Base URL</label><input type="text" data-form="env" name="OLLAMA_BASE_URL" value="http://127.0.0.1:11434" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Open WebUI Base URL</label><input type="text" data-form="env" name="OPEN_WEBUI_BASE_URL" value="http://127.0.0.1:8080/api" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Open WebUI API Key</label><input type="password" data-form="env" name="OPEN_WEBUI_API_KEY" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
-              <h2 class="text-lg font-semibold text-white">Configuração do Servidor</h2>
-            </div>
-            <div class="p-6 space-y-5">
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Porta</label><input type="text" data-form="env" name="PORT" value="3000" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Host</label><input type="text" data-form="env" name="HOST" value="0.0.0.0" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">API Token (Segurança)</label><input type="password" data-form="env" name="API_TOKEN" placeholder="Seu token super secreto" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1.5">Modo Worker</label>
-                <select data-form="env" name="WORKER_MODE" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
-                  <option value="false">false</option>
-                  <option value="true">true</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-              <h2 class="text-lg font-semibold text-white">Sistema e Memória</h2>
-            </div>
-            <div class="p-6 space-y-5">
-              <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1.5">Backend de Memória</label>
-                <select data-form="env" name="MEMORY_BACKEND" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
-                  <option value="none">none</option>
-                  <option value="markdown" selected>markdown</option>
-                  <option value="sqlite">sqlite</option>
-                </select>
-              </div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Computer-Use Endpoint</label><input type="text" data-form="env" name="COMPUTER_USE_ENDPOINT" value="http://127.0.0.1:8787/v1/actions" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-            </div>
+        <!-- Search -->
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4">
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" id="search-input" placeholder="Filtrar configurações..." 
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:ring-2 focus:ring-claw-500 focus:border-claw-500 outline-none transition-all">
           </div>
         </div>
 
-        <div id="view-cli" class="space-y-6 hidden">
-          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-400"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/></svg>
-              <h2 class="text-lg font-semibold text-white">Comando Base</h2>
-            </div>
-            <div class="p-6 space-y-5">
+        <!-- AI Providers -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.05s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-claw-500/20 to-purple-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-claw-600 dark:text-claw-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1.5">Executável</label>
-                <select data-form="cli" name="executable" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
-                  <option value="npx openclaw">npx openclaw</option>
-                  <option value="node bin/openclaw.js">node bin/openclaw.js</option>
-                  <option value="docker run -p 3000:3000 openclaw">docker run -p 3000:3000 openclaw</option>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Provedores de IA</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Configure pelo menos uma chave de API</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="ai-providers">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-ai-providers" class="p-6 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label class="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+                  Anthropic Claude
+                  <span class="ml-2 px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded">Recomendado</span>
+                </label>
+                <input type="password" data-env="ANTHROPIC_API_KEY" placeholder="sk-ant-..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">OpenAI</label>
+                <input type="password" data-env="OPENAI_API_KEY" placeholder="sk-..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Google Gemini</label>
+                <input type="password" data-env="GOOGLE_API_KEY" placeholder="AIza..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">DeepSeek</label>
+                <input type="password" data-env="DEEPSEEK_API_KEY" placeholder="sk-..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Groq</label>
+                <input type="password" data-env="GROQ_API_KEY" placeholder="gsk_..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">OpenRouter</label>
+                <input type="password" data-env="OPENROUTER_API_KEY" placeholder="sk-or-..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+            </div>
+            <button id="toggle-more-providers" class="flex items-center text-sm text-claw-600 dark:text-claw-400 hover:text-claw-700 font-medium">
+              <svg class="w-4 h-4 mr-1 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              Mais provedores
+            </button>
+            <div id="more-providers" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">智谱 AI (GLM)</label>
+                <input type="password" data-env="ZHIPU_API_KEY" placeholder="Your GLM API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Moonshot (Kimi)</label>
+                <input type="password" data-env="MOONSHOT_API_KEY" placeholder="Your Moonshot API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">通义千问 (Qwen)</label>
+                <input type="password" data-env="QWEN_API_KEY" placeholder="Your Qwen API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">NVIDIA NIM</label>
+                <input type="password" data-env="NVIDIA_API_KEY" placeholder="nvapi-..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Cerebras</label>
+                <input type="password" data-env="CEREBRAS_API_KEY" placeholder="Your Cerebras API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">火山引擎 (Volcengine)</label>
+                <input type="password" data-env="VOLCENGINE_API_KEY" placeholder="Your Volcengine API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Local Providers -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.1s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Modelos Locais</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Ollama, VLLM, llama.cpp</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="local-providers">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-local-providers" class="p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Ollama Base URL</label>
+                <input type="text" data-env="OLLAMA_BASE_URL" placeholder="http://localhost:11434/v1" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">VLLM Base URL</label>
+                <input type="text" data-env="VLLM_BASE_URL" placeholder="http://localhost:8000/v1" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">llama.cpp Base URL</label>
+                <input type="text" data-env="LLAMACPP_BASE_URL" placeholder="http://localhost:8080/v1" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Osaurus (MLX) Base URL</label>
+                <input type="text" data-env="OSAURUS_BASE_URL" placeholder="http://localhost:1337/v1" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Channels -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.15s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Canais de Comunicação</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">WhatsApp, Telegram, Discord, Slack, Matrix, Signal</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="channels">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-channels" class="hidden p-6 space-y-5">
+            <!-- Telegram -->
+            <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                <h3 class="font-semibold text-slate-900 dark:text-white">Telegram</h3>
+              </div>
+              <input type="password" data-env="TELEGRAM_BOT_TOKEN" placeholder="Bot token from @BotFather" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+            </div>
+            <!-- Discord -->
+            <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                <h3 class="font-semibold text-slate-900 dark:text-white">Discord</h3>
+              </div>
+              <div class="space-y-3">
+                <input type="password" data-env="DISCORD_BOT_TOKEN" placeholder="Bot token" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                  <input type="text" data-env="DISCORD_CLIENT_ID" placeholder="Client ID" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                  <input type="password" data-env="DISCORD_CLIENT_SECRET" placeholder="Client Secret" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                </div>
+              </div>
+            </div>
+            <!-- Slack -->
+            <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+                <h3 class="font-semibold text-slate-900 dark:text-white">Slack</h3>
+              </div>
+              <div class="space-y-3">
+                <input type="password" data-env="SLACK_BOT_TOKEN" placeholder="Bot Token (xoxb-...)" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                  <input type="password" data-env="SLACK_SIGNING_SECRET" placeholder="Signing Secret" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                  <input type="password" data-env="SLACK_APP_TOKEN" placeholder="App Token (xapp-...)" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                </div>
+              </div>
+            </div>
+            <!-- Matrix -->
+            <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-slate-700 dark:text-slate-300 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M.632.55v22.9H2.28V24H0V0h2.28v.55zm7.043 7.26v1.36h.04c.15-.33.37-.63.66-.88.28-.26.62-.46 1-.61.39-.15.8-.22 1.23-.22.45 0 .86.08 1.24.23.37.15.68.39.93.72.26.33.46.75.61 1.26.15.51.22 1.13.22 1.85v7.12H11.4v-6.68c0-.55-.14-.98-.42-1.29-.28-.31-.67-.47-1.16-.47-.38 0-.71.08-.99.26-.27.17-.48.41-.63.72-.15.31-.22.67-.22 1.09v6.37H5.57V7.71h2.11zm12.693.04v1.3h-1.42v4.96c0 .27.04.45.13.55.09.1.27.14.54.14h.24v1.5c-.13.01-.32.03-.56.06-.24.03-.48.05-.74.05-.53 0-.93-.13-1.2-.38-.27-.26-.4-.66-.4-1.21V9.2h-1.09V7.9h1.09V5.88h2.09v2.02h1.42v.04z"/></svg>
+                <h3 class="font-semibold text-slate-900 dark:text-white">Matrix</h3>
+              </div>
+              <div class="space-y-3">
+                <input type="text" data-env="MATRIX_HOMESERVER_URL" placeholder="https://matrix.org" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                  <input type="password" data-env="MATRIX_ACCESS_TOKEN" placeholder="Access Token" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                  <input type="text" data-env="MATRIX_USER_ID" placeholder="@user:matrix.org" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                </div>
+              </div>
+            </div>
+            <!-- Signal -->
+            <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+              <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 2.166.58 4.202 1.592 5.973a.6.6 0 0 1 .067.397l-.826 3.814 4.353-1.092a.6.6 0 0 1 .397.067A11.946 11.946 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                <h3 class="font-semibold text-slate-900 dark:text-white">Signal</h3>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <input type="text" data-env="SIGNAL_PHONE_NUMBER" placeholder="+1234567890" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                <input type="text" data-env="SIGNAL_CLI_PATH" placeholder="/usr/bin/signal-cli" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Gateway -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.2s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Gateway</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Configuração do servidor WebSocket</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="gateway">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-gateway" class="hidden p-6 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Porta</label>
+                <input type="number" data-env="GATEWAY_PORT" value="18789" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Host</label>
+                <select data-env="GATEWAY_HOST" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 text-sm">
+                  <option value="127.0.0.1">127.0.0.1 (localhost only)</option>
+                  <option value="0.0.0.0">0.0.0.0 (todas interfaces)</option>
                 </select>
               </div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Caminho do .env</label><input type="text" data-form="cli" name="configPath" value="./.env" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
+            </div>
+            <div class="input-group">
+              <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Modo de Autenticação</label>
+              <select data-env="GATEWAY_AUTH_MODE" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 text-sm">
+                <option value="token">token (recomendado)</option>
+                <option value="password">password</option>
+                <option value="none">none (não recomendado)</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">JWT Secret</label>
+              <div class="flex space-x-2">
+                <input type="password" data-env="GATEWAY_JWT_SECRET" placeholder="Chave secreta aleatória..." class="env-input flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+                <button id="btn-gen-jwt" class="px-4 py-2.5 bg-claw-600 hover:bg-claw-700 text-white rounded-lg text-sm font-medium transition-colors">Gerar</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.25s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              </div>
               <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1.5">Nível de Log</label>
-                <select data-form="cli" name="logLevel" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Recursos Opcionais</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Habilite funcionalidades adicionais</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="features">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-features" class="hidden p-6 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Nível de Log</label>
+                <select data-env="LOG_LEVEL" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 text-sm">
                   <option value="info">info</option>
                   <option value="debug">debug</option>
                   <option value="warn">warn</option>
                   <option value="error">error</option>
                 </select>
               </div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
-              <h2 class="text-lg font-semibold text-white">Rede & Sistema</h2>
-            </div>
-            <div class="p-6 space-y-5">
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Porta (--port)</label><input type="text" data-form="cli" name="port" value="3000" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div><label class="block text-sm font-medium text-slate-400 mb-1.5">Host (--host)</label><input type="text" data-form="cli" name="host" value="0.0.0.0" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm font-mono" /></div>
-              <div>
-                <label class="block text-sm font-medium text-slate-400 mb-1.5">Memória (--memory)</label>
-                <select data-form="cli" name="memory" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all sm:text-sm">
+              <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Backend de Memória</label>
+                <select data-env="MEMORY_BACKEND" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 text-sm">
                   <option value="markdown">markdown</option>
                   <option value="sqlite">sqlite</option>
                   <option value="none">none</option>
                 </select>
               </div>
-              <div class="flex items-center space-x-3">
-                <input type="checkbox" id="worker-checkbox" data-form="cli" name="worker" class="w-5 h-5 rounded border-slate-700 bg-slate-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer" />
-                <label for="worker-checkbox" class="text-sm font-medium text-slate-300 cursor-pointer select-none">Ativar Modo Worker (--worker)</label>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div>
+                  <label class="font-medium text-slate-900 dark:text-white">Browser Automation</label>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Requer Chrome/Chromium</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" data-env="ENABLE_BROWSER" value="true" class="sr-only peer env-input">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-claw-300 dark:peer-focus:ring-claw-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-claw-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div>
+                  <label class="font-medium text-slate-900 dark:text-white">Cron Jobs</label>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Tarefas agendadas</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" data-env="ENABLE_CRON" value="true" class="sr-only peer env-input">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-claw-300 dark:peer-focus:ring-claw-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-claw-600"></div>
+                </label>
               </div>
             </div>
+            <div class="input-group">
+              <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Computer-Use Endpoint</label>
+              <input type="text" data-env="COMPUTER_USE_ENDPOINT" placeholder="http://127.0.0.1:8787/v1/actions" class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+            </div>
           </div>
-        </div>
+        </section>
+
+        <!-- Custom Providers -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.3s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-rose-500/20 to-pink-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Provedores Customizados</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">OpenAI-compatible (Together, Fireworks, Perplexity...)</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="custom-providers">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-custom-providers" class="hidden p-6 space-y-4">
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <p class="text-sm text-amber-800 dark:text-amber-200">Adicione provedores OpenAI-compatible dinamicamente sem modificar código.</p>
+            </div>
+            <div id="custom-providers-list" class="space-y-4"></div>
+            <button id="btn-add-custom-provider" class="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 hover:border-claw-500 hover:text-claw-600 transition-all flex items-center justify-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Adicionar Provedor
+            </button>
+          </div>
+        </section>
+
+        <!-- Tunnel -->
+        <section class="config-section bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden section-enter" style="animation-delay: 0.35s">
+          <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg">
+                <svg class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Túnel (Tunnel)</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Acesso remoto seguro via ngrok</p>
+              </div>
+            </div>
+            <button class="section-toggle p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" data-section="tunnel">
+              <svg class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+          </div>
+          <div id="section-tunnel" class="hidden p-6 space-y-4">
+            <div class="input-group">
+              <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">ngrok Auth Token</label>
+              <input type="password" data-env="NGROK_AUTH_TOKEN" placeholder="your-ngrok-token..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+            </div>
+          </div>
+        </section>
       </div>
 
-      <div class="lg:col-span-5">
-        <div class="bg-[#1e1e2e] rounded-xl shadow-2xl overflow-hidden sticky top-32 border border-slate-800">
-          <div class="flex items-center justify-between px-4 py-3 bg-[#181825] border-b border-slate-700/50">
-            <div class="flex items-center space-x-2">
-              <div class="flex space-x-1.5">
-                <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+      <!-- Preview -->
+      <div class="xl:col-span-5">
+        <div class="sticky top-24 space-y-4">
+          <div class="bg-[#1e1e2e] rounded-xl shadow-2xl overflow-hidden border border-slate-700">
+            <div class="flex items-center justify-between px-4 py-3 bg-[#181825] border-b border-slate-700/50">
+              <div class="flex items-center space-x-2">
+                <div class="flex space-x-1.5">
+                  <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                  <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                  <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                </div>
+                <span id="preview-filename" class="ml-2 text-xs font-mono text-slate-400">.env</span>
               </div>
-              <span id="preview-title" class="ml-2 text-xs font-mono text-slate-400">.env</span>
+              <span id="preview-stats" class="text-xs text-slate-500">0 variáveis</span>
+            </div>
+            <div class="p-4 overflow-x-auto max-h-[70vh] overflow-y-auto">
+              <pre id="preview-content" class="text-sm font-mono whitespace-pre-wrap leading-relaxed"></pre>
             </div>
           </div>
-          <div class="p-4 overflow-x-auto min-h-[150px]">
-            <pre id="preview-content" class="text-sm font-mono whitespace-pre-wrap leading-relaxed text-[#cdd6f4]"></pre>
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4">
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-3 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-claw-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Informações
+            </h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <li class="flex items-start"><svg class="w-4 h-4 mr-2 text-emerald-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Suporta 15+ provedores de IA</li>
+              <li class="flex items-start"><svg class="w-4 h-4 mr-2 text-emerald-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>7 canais de comunicação</li>
+              <li class="flex items-start"><svg class="w-4 h-4 mr-2 text-emerald-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Provedores OpenAI-compatible</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
   </main>
 
-  <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 flex space-x-4 lg:hidden z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-    <button id="btn-copy-mobile" class="flex-1 flex justify-center items-center px-4 py-3 text-sm font-medium text-slate-200 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 active:scale-[0.98] transition-all">
-      <svg id="icon-copy-mobile" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-      <svg id="icon-check-mobile" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-emerald-400 hidden"><polyline points="20 6 9 17 4 12"/></svg>
-      <span>Copiar</span>
-    </button>
-    <button id="btn-download-mobile" class="flex-1 flex justify-center items-center px-4 py-3 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-      <span>Baixar</span>
-    </button>
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-4 right-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <div class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3">
+      <svg class="w-5 h-5 text-emerald-400 dark:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      <span id="toast-message" class="font-medium">Sucesso!</span>
+    </div>
   </div>
 
   <script>
-    const formData = {
-      ANTHROPIC_API_KEY: '', OPENAI_API_KEY: '', GOOGLE_API_KEY: '', DEEPSEEK_API_KEY: '', GROQ_API_KEY: '', OPENROUTER_API_KEY: '',
-      OLLAMA_BASE_URL: 'http://127.0.0.1:11434', OPEN_WEBUI_BASE_URL: 'http://127.0.0.1:8080/api', OPEN_WEBUI_API_KEY: '',
-      PORT: '3000', HOST: '0.0.0.0', API_TOKEN: '', WORKER_MODE: 'false',
-      MEMORY_BACKEND: 'markdown', COMPUTER_USE_ENDPOINT: 'http://127.0.0.1:8787/v1/actions'
-    };
-
-    const cliData = {
-      executable: 'npx openclaw', port: '3000', host: '0.0.0.0', worker: false, memory: 'markdown', configPath: './.env', logLevel: 'info'
-    };
-
-    let activeTab = 'env';
-    let envContent = '';
-    let cliContent = '';
-
-    const viewEnv = document.getElementById('view-env');
-    const viewCli = document.getElementById('view-cli');
-    const tabEnv = document.getElementById('tab-env');
-    const tabCli = document.getElementById('tab-cli');
-    const previewTitle = document.getElementById('preview-title');
+    const state = { env: {}, customProviders: [], darkMode: true };
     const previewContent = document.getElementById('preview-content');
-    const lblDownloadDesktop = document.getElementById('lbl-download-desktop');
+    const previewStats = document.getElementById('preview-stats');
+    const fileInput = document.getElementById('file-input');
 
-    function updateEnvContent() {
-      let result = '# ============================================\n# OpenClaw Environment Variables\n# ============================================\n\n# --- Provedores de IA ---\n';
-      ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY'].forEach(key => {
-        if (formData[key]) result += key + '=' + formData[key] + '\n';
-      });
-      result += '\n# --- Modelos Locais ---\n';
-      ['OLLAMA_BASE_URL', 'OPEN_WEBUI_BASE_URL', 'OPEN_WEBUI_API_KEY'].forEach(key => {
-        if (formData[key]) result += key + '=' + formData[key] + '\n';
-      });
-      result += '\n# --- Configuração do Servidor ---\n';
-      ['PORT', 'HOST', 'API_TOKEN', 'WORKER_MODE'].forEach(key => {
-        if (formData[key]) result += key + '=' + formData[key] + '\n';
-      });
-      result += '\n# --- Memória e Sistema ---\n';
-      ['MEMORY_BACKEND', 'COMPUTER_USE_ENDPOINT'].forEach(key => {
-        if (formData[key]) result += key + '=' + formData[key] + '\n';
-      });
-      envContent = result;
-      renderPreview();
+    function init() {
+      loadTheme();
+      setupEventListeners();
+      updatePreview();
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme(false);
     }
 
-    function updateCliContent() {
-      let cmd = cliData.executable;
-      if (cliData.executable.startsWith('docker')) {
-        cmd += ' --env-file ' + cliData.configPath;
-        cliContent = cmd;
-        renderPreview();
-        return;
-      }
-      if (cliData.port) cmd += ' --port ' + cliData.port;
-      if (cliData.host) cmd += ' --host ' + cliData.host;
-      if (cliData.memory) cmd += ' --memory ' + cliData.memory;
-      if (cliData.logLevel && cliData.logLevel !== 'info') cmd += ' --log ' + cliData.logLevel;
-      if (cliData.configPath !== './.env') cmd += ' --config ' + cliData.configPath;
-      if (cliData.worker) cmd += ' --worker';
-      cliContent = cmd;
-      renderPreview();
+    function loadTheme() {
+      const saved = localStorage.getItem('openclaw-theme');
+      if (saved !== null) setTheme(saved === 'dark');
     }
 
-    function renderPreview() {
-      if (activeTab === 'env') {
-        previewTitle.textContent = '.env';
-        previewContent.textContent = envContent;
-        previewContent.className = 'text-sm font-mono whitespace-pre-wrap leading-relaxed text-[#cdd6f4]';
-        lblDownloadDesktop.textContent = 'Baixar .env';
-      } else {
-        previewTitle.textContent = 'terminal';
-        previewContent.textContent = '$ ' + cliContent;
-        previewContent.className = 'text-sm font-mono whitespace-pre-wrap leading-relaxed text-[#a6e3a1]';
-        lblDownloadDesktop.textContent = 'Baixar .sh';
-      }
+    function setTheme(dark) {
+      state.darkMode = dark;
+      document.documentElement.classList.toggle('dark', dark);
+      document.getElementById('icon-moon').classList.toggle('hidden', dark);
+      document.getElementById('icon-sun').classList.toggle('hidden', !dark);
+      localStorage.setItem('openclaw-theme', dark ? 'dark' : 'light');
     }
 
-    function switchTab(tab) {
-      activeTab = tab;
-      if (tab === 'env') {
-        viewEnv.classList.remove('hidden');
-        viewCli.classList.add('hidden');
-        tabEnv.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all bg-slate-800 text-white shadow-sm ring-1 ring-slate-700';
-        tabCli.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
-      } else {
-        viewCli.classList.remove('hidden');
-        viewEnv.classList.add('hidden');
-        tabCli.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all bg-slate-800 text-white shadow-sm ring-1 ring-slate-700';
-        tabEnv.className = 'flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
-      }
-      renderPreview();
-    }
+    function setupEventListeners() {
+      document.getElementById('btn-theme').addEventListener('click', () => setTheme(!state.darkMode));
 
-    tabEnv.addEventListener('click', () => switchTab('env'));
-    tabCli.addEventListener('click', () => switchTab('cli'));
+      const btnExport = document.getElementById('btn-export');
+      const exportMenu = document.getElementById('export-menu');
+      btnExport.addEventListener('click', (e) => { e.stopPropagation(); exportMenu.classList.toggle('hidden'); });
+      document.addEventListener('click', () => exportMenu.classList.add('hidden'));
+      exportMenu.addEventListener('click', (e) => e.stopPropagation());
 
-    document.querySelectorAll('[data-form="env"]').forEach(el => {
-      el.addEventListener('input', (e) => {
-        formData[e.target.name] = e.target.value;
-        updateEnvContent();
+      document.querySelectorAll('[data-export]').forEach(btn => {
+        btn.addEventListener('click', () => { exportConfig(btn.dataset.export); exportMenu.classList.add('hidden'); });
       });
-    });
 
-    document.querySelectorAll('[data-form="cli"]').forEach(el => {
-      el.addEventListener('input', (e) => {
-        if (e.target.type === 'checkbox') {
-          cliData[e.target.name] = e.target.checked;
-        } else {
-          cliData[e.target.name] = e.target.value;
+      document.getElementById('btn-copy').addEventListener('click', copyToClipboard);
+      document.getElementById('btn-import').addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', importEnv);
+
+      document.querySelectorAll('.section-toggle').forEach(btn => {
+        btn.addEventListener('click', () => toggleSection(btn.dataset.section));
+      });
+
+      document.getElementById('toggle-more-providers').addEventListener('click', function() {
+        const more = document.getElementById('more-providers');
+        const icon = this.querySelector('svg');
+        more.classList.toggle('hidden');
+        icon.classList.toggle('rotate-90');
+        this.childNodes[2].textContent = more.classList.contains('hidden') ? ' Mais provedores' : ' Menos provedores';
+      });
+
+      document.querySelectorAll('.env-input').forEach(input => {
+        input.addEventListener('input', () => {
+          const key = input.dataset.env;
+          const value = input.type === 'checkbox' ? (input.checked ? 'true' : '') : input.value.trim();
+          if (value) state.env[key] = value; else delete state.env[key];
+          updatePreview();
+        });
+      });
+
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.config-section').forEach(section => {
+          section.style.display = section.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+      });
+
+      document.getElementById('btn-gen-jwt').addEventListener('click', () => {
+        const jwt = Array.from({length: 64}, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'[Math.floor(Math.random() * 70)]).join('');
+        const input = document.querySelector('[data-env="GATEWAY_JWT_SECRET"]');
+        input.value = jwt;
+        input.dispatchEvent(new Event('input'));
+        showToast('JWT Secret gerado!');
+      });
+
+      document.getElementById('btn-add-custom-provider').addEventListener('click', addCustomProvider);
+    }
+
+    function toggleSection(sectionId) {
+      const content = document.getElementById('section-' + sectionId);
+      const btn = document.querySelector('[data-section="' + sectionId + '"] svg');
+      content.classList.toggle('hidden');
+      btn.classList.toggle('rotate-180');
+    }
+
+    function addCustomProvider() {
+      const id = Date.now();
+      const container = document.getElementById('custom-providers-list');
+      const div = document.createElement('div');
+      div.className = 'border border-slate-200 dark:border-slate-700 rounded-lg p-4 space-y-3';
+      div.innerHTML = `
+        <div class="flex justify-between items-center">
+          <h4 class="font-medium text-slate-900 dark:text-white">Novo Provedor</h4>
+          <button class="remove-provider text-rose-500 hover:text-rose-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <input type="text" placeholder="Prefix (ex: together)" class="provider-prefix px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm">
+          <input type="text" placeholder="Nome (ex: Together AI)" class="provider-name px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm">
+        </div>
+        <input type="text" placeholder="Base URL" class="provider-url w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-mono">
+        <input type="password" placeholder="API Key (opcional)" class="provider-key w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-mono">
+        <input type="text" placeholder="Modelos (opcional, separados por vírgula)" class="provider-models w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm">
+      `;
+      div.querySelector('.remove-provider').addEventListener('click', () => { div.remove(); updateCustomProviders(); });
+      div.querySelectorAll('input').forEach(input => input.addEventListener('input', updateCustomProviders));
+      container.appendChild(div);
+    }
+
+    function updateCustomProviders() {
+      state.customProviders = [];
+      document.querySelectorAll('#custom-providers-list > div').forEach(div => {
+        const prefix = div.querySelector('.provider-prefix').value.trim().toUpperCase();
+        const name = div.querySelector('.provider-name').value.trim();
+        const url = div.querySelector('.provider-url').value.trim();
+        const key = div.querySelector('.provider-key').value.trim();
+        const models = div.querySelector('.provider-models').value.trim();
+        if (prefix && name && url) state.customProviders.push({prefix, name, url, key, models});
+      });
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const lines = ['# ============================================', '# OpenClaw Environment Configuration', '# ============================================', ''];
+      const groups = {
+        'AI Providers': ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'ZHIPU_API_KEY', 'MOONSHOT_API_KEY', 'QWEN_API_KEY', 'NVIDIA_API_KEY', 'CEREBRAS_API_KEY', 'VOLCENGINE_API_KEY'],
+        'Local Providers': ['OLLAMA_BASE_URL', 'VLLM_BASE_URL', 'LLAMACPP_BASE_URL', 'OSAURUS_BASE_URL'],
+        'Channels': ['TELEGRAM_BOT_TOKEN', 'DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'SLACK_BOT_TOKEN', 'SLACK_SIGNING_SECRET', 'SLACK_APP_TOKEN', 'MATRIX_HOMESERVER_URL', 'MATRIX_ACCESS_TOKEN', 'MATRIX_USER_ID', 'SIGNAL_PHONE_NUMBER', 'SIGNAL_CLI_PATH'],
+        'Gateway': ['GATEWAY_PORT', 'GATEWAY_HOST', 'GATEWAY_AUTH_MODE', 'GATEWAY_JWT_SECRET'],
+        'Features': ['LOG_LEVEL', 'MEMORY_BACKEND', 'ENABLE_BROWSER', 'ENABLE_CRON', 'COMPUTER_USE_ENDPOINT'],
+        'Tunnel': ['NGROK_AUTH_TOKEN']
+      };
+      let count = 0;
+      for (const [groupName, keys] of Object.entries(groups)) {
+        const groupVars = keys.filter(k => state.env[k]).map(k => ({key: k, value: state.env[k]}));
+        if (groupVars.length > 0) {
+          lines.push('# --- ' + groupName + ' ---');
+          groupVars.forEach(v => { lines.push(v.key + '=' + v.value); count++; });
+          lines.push('');
         }
-        updateCliContent();
-      });
-    });
-
-    function handleCopy() {
-      const textToCopy = activeTab === 'env' ? envContent : cliContent;
-      const el = document.createElement('textarea');
-      el.value = textToCopy;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-
-      document.getElementById('icon-copy-desktop').classList.add('hidden');
-      document.getElementById('icon-check-desktop').classList.remove('hidden');
-      document.getElementById('icon-copy-mobile').classList.add('hidden');
-      document.getElementById('icon-check-mobile').classList.remove('hidden');
-
-      setTimeout(() => {
-        document.getElementById('icon-copy-desktop').classList.remove('hidden');
-        document.getElementById('icon-check-desktop').classList.add('hidden');
-        document.getElementById('icon-copy-mobile').classList.remove('hidden');
-        document.getElementById('icon-check-mobile').classList.add('hidden');
-      }, 2000);
+      }
+      if (state.customProviders.length > 0) {
+        lines.push('# --- Custom Providers ---');
+        lines.push('CUSTOM_PROVIDERS=' + state.customProviders.map(p => p.prefix.toLowerCase()).join(','));
+        lines.push('');
+        state.customProviders.forEach(p => {
+          lines.push('# ' + p.name);
+          lines.push(p.prefix + '_NAME="' + p.name + '"');
+          lines.push(p.prefix + '_BASE_URL=' + p.url);
+          if (p.key) lines.push(p.prefix + '_API_KEY=' + p.key);
+          if (p.models) lines.push(p.prefix + '_MODELS="' + p.models + '"');
+          lines.push('');
+          count += p.key ? 4 : 3;
+        });
+      }
+      previewContent.innerHTML = syntaxHighlight(lines.join('\n'));
+      previewStats.textContent = count + ' variáveis configuradas';
     }
 
-    function handleDownload() {
-      let content, filename;
-      if (activeTab === 'cli') {
-        content = '#!/bin/bash\n\n' + cliContent + '\n';
-        filename = 'start-openclaw.sh';
-      } else {
-        content = envContent;
-        filename = '.env';
+    function syntaxHighlight(content) {
+      return content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/^(#.*)$/gm, '<span class="syntax-comment">$1</span>')
+        .replace(/^[A-Z_][A-Z_0-9]*(?==)/gm, '<span class="syntax-keyword">$&</span>')
+        .replace(/=(.+)$/gm, '=<span class="syntax-string">$1</span>')
+        .replace(/\b(true|false)\b/g, '<span class="syntax-boolean">$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>');
+    }
+
+    function copyToClipboard() {
+      navigator.clipboard.writeText(generateEnvContent()).then(() => {
+        document.getElementById('icon-copy').classList.add('hidden');
+        document.getElementById('icon-check').classList.remove('hidden');
+        showToast('Configuração copiada!');
+        setTimeout(() => {
+          document.getElementById('icon-copy').classList.remove('hidden');
+          document.getElementById('icon-check').classList.add('hidden');
+        }, 2000);
+      });
+    }
+
+    function generateEnvContent() {
+      const lines = [];
+      const groups = {
+        'AI Providers': ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'ZHIPU_API_KEY', 'MOONSHOT_API_KEY', 'QWEN_API_KEY', 'NVIDIA_API_KEY', 'CEREBRAS_API_KEY', 'VOLCENGINE_API_KEY'],
+        'Local Providers': ['OLLAMA_BASE_URL', 'VLLM_BASE_URL', 'LLAMACPP_BASE_URL', 'OSAURUS_BASE_URL'],
+        'Channels': ['TELEGRAM_BOT_TOKEN', 'DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'SLACK_BOT_TOKEN', 'SLACK_SIGNING_SECRET', 'SLACK_APP_TOKEN', 'MATRIX_HOMESERVER_URL', 'MATRIX_ACCESS_TOKEN', 'MATRIX_USER_ID', 'SIGNAL_PHONE_NUMBER', 'SIGNAL_CLI_PATH'],
+        'Gateway': ['GATEWAY_PORT', 'GATEWAY_HOST', 'GATEWAY_AUTH_MODE', 'GATEWAY_JWT_SECRET'],
+        'Features': ['LOG_LEVEL', 'MEMORY_BACKEND', 'ENABLE_BROWSER', 'ENABLE_CRON', 'COMPUTER_USE_ENDPOINT'],
+        'Tunnel': ['NGROK_AUTH_TOKEN']
+      };
+      for (const [groupName, keys] of Object.entries(groups)) {
+        const groupVars = keys.filter(k => state.env[k]).map(k => ({key: k, value: state.env[k]}));
+        if (groupVars.length > 0) {
+          lines.push('# --- ' + groupName + ' ---');
+          groupVars.forEach(v => lines.push(v.key + '=' + v.value));
+          lines.push('');
+        }
       }
-      const blob = new Blob([content], { type: 'text/plain' });
+      if (state.customProviders.length > 0) {
+        lines.push('# --- Custom Providers ---');
+        lines.push('CUSTOM_PROVIDERS=' + state.customProviders.map(p => p.prefix.toLowerCase()).join(','));
+        lines.push('');
+        state.customProviders.forEach(p => {
+          lines.push('# ' + p.name);
+          lines.push(p.prefix + '_NAME="' + p.name + '"');
+          lines.push(p.prefix + '_BASE_URL=' + p.url);
+          if (p.key) lines.push(p.prefix + '_API_KEY=' + p.key);
+          if (p.models) lines.push(p.prefix + '_MODELS="' + p.models + '"');
+          lines.push('');
+        });
+      }
+      return lines.join('\n');
+    }
+
+    function exportConfig(type) {
+      let content, filename, mimeType;
+      switch (type) {
+        case 'env':
+          content = generateEnvContent();
+          filename = '.env';
+          mimeType = 'text/plain';
+          break;
+        case 'docker':
+          content = 'version: "3.8"\n\nservices:\n  openclaw:\n    image: openclaw-js:latest\n    container_name: openclaw\n    restart: unless-stopped\n    ports:\n      - "' + (state.env.GATEWAY_PORT || '18789') + ':18789"\n    environment:\n      - GATEWAY_HOST=0.0.0.0\n' + Object.entries(state.env).filter(([k]) => k !== 'GATEWAY_HOST').map(([k, v]) => '      - ' + k + '=' + v).join('\n') + '\n    volumes:\n      - openclaw-data:/root/.openclaw\n\nvolumes:\n  openclaw-data:\n';
+          filename = 'docker-compose.yml';
+          mimeType = 'text/yaml';
+          break;
+        case 'systemd':
+          content = '[Unit]\nDescription=OpenClaw JS - Personal AI Assistant\nAfter=network.target\n\n[Service]\nType=simple\nUser=openclaw\nWorkingDirectory=/opt/openclaw-js\nExecStart=/usr/bin/npm start\nRestart=always\nRestartSec=10\nEnvironment=NODE_ENV=production\n\n[Install]\nWantedBy=multi-user.target\n';
+          filename = 'openclaw.service';
+          mimeType = 'text/plain';
+          break;
+        case 'cli':
+          content = '#!/bin/bash\n\n# Start OpenClaw\ncd "$(dirname "$0")"\n\n' + generateEnvContent().split('\n').map(l => l.startsWith('#') ? l : 'export ' + l).join('\n') + '\n\nnpm start\n';
+          filename = 'start.sh';
+          mimeType = 'text/x-shellscript';
+          break;
+      }
+      const blob = new Blob([content], {type: mimeType});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -355,15 +789,40 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      showToast(filename + ' baixado!');
     }
 
-    document.getElementById('btn-copy-desktop').addEventListener('click', handleCopy);
-    document.getElementById('btn-copy-mobile').addEventListener('click', handleCopy);
-    document.getElementById('btn-download-desktop').addEventListener('click', handleDownload);
-    document.getElementById('btn-download-mobile').addEventListener('click', handleDownload);
+    function importEnv(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        event.target.result.split('\n').forEach(line => {
+          const match = line.match(/^([A-Z_][A-Z_0-9]*)=(.+)$/);
+          if (match) state.env[match[1]] = match[2].replace(/^["']|["']$/g, '');
+        });
+        document.querySelectorAll('.env-input').forEach(input => {
+          const key = input.dataset.env;
+          if (state.env[key]) {
+            if (input.type === 'checkbox') input.checked = state.env[key] === 'true';
+            else input.value = state.env[key];
+          }
+        });
+        updatePreview();
+        showToast('Arquivo .env importado!');
+      };
+      reader.readAsText(file);
+      fileInput.value = '';
+    }
 
-    updateEnvContent();
-    updateCliContent();
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+    }
+
+    init();
   </script>
 </body>
 </html>

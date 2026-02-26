@@ -26,6 +26,25 @@
 - Node.js >= 22.0.0
 - npm, pnpm, or yarn
 
+### Configuração (Web UI)
+
+Use o **OpenClaw Configurator** para gerar seu arquivo `.env` de forma visual:
+
+```bash
+# Abra o configurator no navegador
+open index.html
+
+# Ou acesse online (quando disponível)
+```
+
+O configurator inclui:
+- 🎨 Interface moderna com dark/light mode
+- 🔐 Campos para 15+ provedores de IA
+- 💬 Configuração de 7 canais (WhatsApp, Telegram, Discord, etc.)
+- ⚙️ Configuração completa do Gateway
+- 📦 Exportação para .env, docker-compose.yml, systemd e shell script
+- 📥 Importação de arquivos .env existentes
+
 ### Install
 
 ```bash

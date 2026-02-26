@@ -355,6 +355,42 @@ interface OpenClawConfig {
 - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`, etc.
 - Channel tokens: `TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`, etc.
 
+### OpenClaw Configurator (index.html)
+
+Para facilitar a configuração, use o **OpenClaw Configurator** — uma interface web visual:
+
+https://caio23364.github.io/openclaw-js/
+
+```bash
+# Abra diretamente no navegador
+open index.html
+
+# Ou sirva com um servidor local
+npx serve index.html
+```
+
+**Funcionalidades do Configurator:**
+- 🎨 Interface moderna com toggle dark/light mode
+- 🔐 Suporte a 15+ provedores de IA (incluindo novos: GLM, Moonshot, Qwen, NVIDIA, Cerebras, Volcengine)
+- 💬 Configuração completa de 7 canais (Telegram, Discord, Slack, Matrix, Signal)
+- ⚙️ Configuração do Gateway (porta, host, auth mode, JWT secret)
+- 📦 Múltiplos formatos de exportação:
+  - `.env` — arquivo de ambiente padrão
+  - `docker-compose.yml` — para deploy Docker
+  - `openclaw.service` — para systemd
+  - `start.sh` — script de inicialização
+- 📥 Importação de arquivos `.env` existentes
+- 🔍 Filtro de configurações por busca
+- 🎨 Syntax highlighting no preview
+
+**Variáveis suportadas no configurator:**
+- **AI Providers**: Anthropic, OpenAI, Google, DeepSeek, Groq, OpenRouter, GLM, Moonshot, Qwen, NVIDIA, Cerebras, Volcengine
+- **Local**: Ollama, VLLM, llama.cpp, Osaurus (MLX)
+- **Channels**: Telegram, Discord, Slack, Matrix, Signal
+- **Gateway**: Port, Host, Auth Mode, JWT Secret
+- **Features**: Log Level, Memory Backend, Browser, Cron
+- **Custom Providers**: Provedores OpenAI-compatible dinâmicos
+
 ---
 
 ## 9. Security Considerations
@@ -815,4 +851,4 @@ ip addr
 ---
 
 **Document Version**: 2026.2.14  
-**Last Updated**: 2026-02-25
+**Last Updated**: 2026-02-25 (Configurator v2 adicionado)
