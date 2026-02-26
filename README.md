@@ -30,6 +30,7 @@
 
 Use o **OpenClaw Configurator** para gerar seu arquivo `.env` de forma visual:
 
+https://caio23364.github.io/openclaw-js/
 ```bash
 # Abra o configurator no navegador
 open index.html
