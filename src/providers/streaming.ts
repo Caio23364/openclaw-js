@@ -16,6 +16,15 @@ import { getMetrics } from '../metrics/index.js';
 import { getProviderManager } from '../providers/index.js';
 import { Message, Tool, ToolCall, Session } from '../types/index.js';
 
+// Helper to safely get gateway (returns null if not initialized)
+function getGatewaySafe() {
+    try {
+        return getGateway();
+    } catch {
+        return null;
+    }
+}
+
 // ── Per-channel message limits ──
 
 export const CHANNEL_LIMITS: Record<string, number> = {
@@ -70,7 +79,7 @@ export async function streamChat(
     options: StreamOptions = {},
 ): Promise<StreamResult> {
     const startTime = Date.now();
-    const gateway = getGateway();
+    const gateway = getGatewaySafe();
     const provider = getProviderManager();
 
     let fullContent = '';
@@ -98,7 +107,7 @@ export async function streamChat(
                 chunks++;
 
                 // Emit gateway event for connected apps
-                if (options.sessionId) {
+                if (options.sessionId && gateway) {
                     gateway.emitAgentEvent(options.sessionId, delta, false);
                 }
 
@@ -112,7 +121,7 @@ export async function streamChat(
         }
 
         // Emit done event
-        if (options.sessionId) {
+        if (options.sessionId && gateway) {
             gateway.emitAgentEvent(options.sessionId, '', true);
         }
     } catch (error: any) {
@@ -136,7 +145,7 @@ export async function streamChat(
         chunks = 1;
 
         // Emit the full content at once
-        if (options.sessionId) {
+        if (options.sessionId && gateway) {
             gateway.emitAgentEvent(options.sessionId, fullContent, true);
         }
     }
@@ -164,7 +173,7 @@ export async function streamWithModel(
     options: StreamOptions = {},
 ): Promise<StreamResult> {
     const startTime = Date.now();
-    const gateway = getGateway();
+    const gateway = getGatewaySafe();
     const provider = getProviderManager();
 
     let fullContent = '';
@@ -189,7 +198,7 @@ export async function streamWithModel(
                 fullContent += delta;
                 chunks++;
 
-                if (options.sessionId) {
+                if (options.sessionId && gateway) {
                     gateway.emitAgentEvent(options.sessionId, delta, false);
                 }
                 if (options.onDelta) {
@@ -200,7 +209,7 @@ export async function streamWithModel(
             }
         }
 
-        if (options.sessionId) {
+        if (options.sessionId && gateway) {
             gateway.emitAgentEvent(options.sessionId, '', true);
         }
     } catch (error: any) {
@@ -217,7 +226,7 @@ export async function streamWithModel(
         toolCalls = response.toolCalls ?? [];
         chunks = 1;
 
-        if (options.sessionId) {
+        if (options.sessionId && gateway) {
             gateway.emitAgentEvent(options.sessionId, fullContent, true);
         }
     }

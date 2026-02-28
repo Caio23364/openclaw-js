@@ -7,8 +7,12 @@ import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 import { randomBytes } from 'crypto';
+import { config as dotenvConfig } from 'dotenv';
 import { GatewayConfig, ChannelConfig, AgentConfig, ProviderConfig } from '../types/index.js';
 import { log } from './logger.js';
+
+// Load .env file from project root
+dotenvConfig();
 
 export const CONFIG_DIR = join(homedir(), '.openclaw');
 export const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
@@ -94,6 +98,55 @@ export interface OpenClawConfig {
   };
 }
 
+// ── Environment-based channel config ────────────────────────────────
+function getTelegramConfigFromEnv(): any {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) return undefined;
+
+  const allowedStr = process.env.TELEGRAM_ALLOWED_USERS;
+  const allowedUsers = allowedStr
+    ? allowedStr.split(',').map(id => id.trim()).filter(id => id.length > 0)
+    : [];
+
+  return {
+    default: {
+      enabled: true,
+      botToken,
+      dropPendingUpdates: true,
+      allowedUsers,
+    },
+  };
+}
+
+// ── Auto-detect AI provider based on available API keys ─────────────
+interface DetectedProvider {
+  provider: string;
+  model: string;
+}
+
+function detectProviderFromEnv(): DetectedProvider {
+  // Check if AI_MODEL is explicitly provided
+  const explicitModel = process.env.AI_MODEL;
+  if (explicitModel && explicitModel.trim().length > 0) {
+    const modelStr = explicitModel.trim();
+    const slashIndex = modelStr.indexOf('/');
+    if (slashIndex !== -1) {
+      const provider = modelStr.slice(0, slashIndex);
+      const model = modelStr.slice(slashIndex + 1);
+      log.info(`Auto-detected AI provider: ${provider} (from AI_MODEL)`);
+      return { provider, model };
+    } else {
+      log.info(`Auto-detected AI provider: google (from AI_MODEL without prefix)`);
+      return { provider: 'google', model: modelStr };
+    }
+  }
+
+  log.error('AI_MODEL environment variable must be explicitly defined (e.g., AI_MODEL=google/gemini-2.0-flash)');
+  process.exit(1);
+}
+
+const detectedProvider = detectProviderFromEnv();
+
 const defaultConfig: OpenClawConfig = {
   gateway: {
     port: 18789,
@@ -125,11 +178,13 @@ const defaultConfig: OpenClawConfig = {
     maxConnectionsPerIp: 20,         // Rate limit: 20 connections/min/IP
     maxMessagesPerClient: 120,       // Rate limit: 120 messages/min/client
   },
-  channels: {},
+  channels: {
+    telegram: getTelegramConfigFromEnv(),
+  },
   agents: {
     default: {
-      model: 'claude-3-opus-20240229',
-      provider: 'anthropic',
+      model: detectedProvider.model,
+      provider: detectedProvider.provider,
       systemPrompt: 'You are OpenClaw, a helpful AI assistant. You help users with their tasks and answer their questions.',
       temperature: 0.7,
       maxTokens: 4096,
@@ -379,12 +434,56 @@ export async function ensureDirectories(): Promise<void> {
 }
 
 /**
+ * Updates provider configs with current environment variables.
+ * This ensures API keys from .env are always fresh.
+ */
+function refreshProviderConfigs(config: OpenClawConfig): void {
+  // Always use the auto-detected provider for the default agent
+  const detected = detectProviderFromEnv();
+  log.info(`[Config] Auto-detected provider: ${detected.provider}, model: ${detected.model}`);
+  if (config.agents.default) {
+    log.info(`[Config] Updating agent from ${config.agents.default.provider} to ${detected.provider}`);
+    config.agents.default.provider = detected.provider;
+    config.agents.default.model = detected.model;
+  } else {
+    log.warn('[Config] config.agents.default not found!');
+  }
+
+  // Update all provider API keys from environment
+  const envMappings: Record<string, string> = {
+    anthropic: 'ANTHROPIC_API_KEY',
+    openai: 'OPENAI_API_KEY',
+    google: 'GOOGLE_API_KEY',
+    deepseek: 'DEEPSEEK_API_KEY',
+    groq: 'GROQ_API_KEY',
+    openrouter: 'OPENROUTER_API_KEY',
+    moonshot: 'MOONSHOT_API_KEY',
+    zhipu: 'ZHIPU_API_KEY',
+    qwen: 'QWEN_API_KEY',
+    nvidia: 'NVIDIA_API_KEY',
+    cerebras: 'CEREBRAS_API_KEY',
+    volcengine: 'VOLCENGINE_API_KEY',
+  };
+
+  for (const [provider, envKey] of Object.entries(envMappings)) {
+    if (config.providers[provider]) {
+      const envValue = process.env[envKey];
+      if (envValue && envValue.trim().length > 0) {
+        config.providers[provider].apiKey = envValue;
+      }
+    }
+  }
+}
+
+/**
  * Loads config from disk and caches it in memory.
  * Subsequent calls return the cached value without disk I/O.
  * Use reloadConfig() to force a re-read from disk.
  */
 export async function loadConfig(): Promise<OpenClawConfig> {
   if (cachedConfig) {
+    // Even cached config gets refreshed with latest env vars
+    refreshProviderConfigs(cachedConfig);
     return cachedConfig;
   }
 
@@ -393,7 +492,11 @@ export async function loadConfig(): Promise<OpenClawConfig> {
   try {
     const content = await readFile(CONFIG_FILE, 'utf-8');
     const fileConfig = JSON.parse(content);
-    const merged = { ...defaultConfig, ...fileConfig };
+    const merged: OpenClawConfig = { ...defaultConfig, ...fileConfig };
+
+    // Always refresh providers with current env vars
+    refreshProviderConfigs(merged);
+
     cachedConfig = merged;
     log.info('Configuration loaded successfully');
     return merged;

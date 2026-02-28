@@ -192,6 +192,10 @@
                 <input type="password" data-env="MOONSHOT_API_KEY" placeholder="Your Moonshot API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
               </div>
               <div class="input-group">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Kimi Code</label>
+                <input type="password" data-env="KIMI_API_KEY" placeholder="Your Kimi Code API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
+              </div>
+              <div class="input-group">
                 <label class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">通义千问 (Qwen)</label>
                 <input type="password" data-env="QWEN_API_KEY" placeholder="Your Qwen API key..." class="env-input w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-mono text-sm">
               </div>
@@ -667,7 +671,7 @@
     function updatePreview() {
       const lines = ['# ============================================', '# OpenClaw Environment Configuration', '# ============================================', ''];
       const groups = {
-        'AI Providers': ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'ZHIPU_API_KEY', 'MOONSHOT_API_KEY', 'QWEN_API_KEY', 'NVIDIA_API_KEY', 'CEREBRAS_API_KEY', 'VOLCENGINE_API_KEY'],
+        'AI Providers': ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'ZHIPU_API_KEY', 'MOONSHOT_API_KEY', 'QWEN_API_KEY', 'NVIDIA_API_KEY', 'CEREBRAS_API_KEY', 'VOLCENGINE_API_KEY', 'KIMI_API_KEY'],
         'Local Providers': ['OLLAMA_BASE_URL', 'VLLM_BASE_URL', 'LLAMACPP_BASE_URL', 'OSAURUS_BASE_URL'],
         'Channels': ['TELEGRAM_BOT_TOKEN', 'DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'SLACK_BOT_TOKEN', 'SLACK_SIGNING_SECRET', 'SLACK_APP_TOKEN', 'MATRIX_HOMESERVER_URL', 'MATRIX_ACCESS_TOKEN', 'MATRIX_USER_ID', 'SIGNAL_PHONE_NUMBER', 'SIGNAL_CLI_PATH'],
         'Gateway': ['GATEWAY_PORT', 'GATEWAY_HOST', 'GATEWAY_AUTH_MODE', 'GATEWAY_JWT_SECRET'],
@@ -725,7 +729,7 @@
     function generateEnvContent() {
       const lines = [];
       const groups = {
-        'AI Providers': ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'ZHIPU_API_KEY', 'MOONSHOT_API_KEY', 'QWEN_API_KEY', 'NVIDIA_API_KEY', 'CEREBRAS_API_KEY', 'VOLCENGINE_API_KEY'],
+        'AI Providers': ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GOOGLE_API_KEY', 'DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'ZHIPU_API_KEY', 'MOONSHOT_API_KEY', 'QWEN_API_KEY', 'NVIDIA_API_KEY', 'CEREBRAS_API_KEY', 'VOLCENGINE_API_KEY', 'KIMI_API_KEY'],
         'Local Providers': ['OLLAMA_BASE_URL', 'VLLM_BASE_URL', 'LLAMACPP_BASE_URL', 'OSAURUS_BASE_URL'],
         'Channels': ['TELEGRAM_BOT_TOKEN', 'DISCORD_BOT_TOKEN', 'DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'SLACK_BOT_TOKEN', 'SLACK_SIGNING_SECRET', 'SLACK_APP_TOKEN', 'MATRIX_HOMESERVER_URL', 'MATRIX_ACCESS_TOKEN', 'MATRIX_USER_ID', 'SIGNAL_PHONE_NUMBER', 'SIGNAL_CLI_PATH'],
         'Gateway': ['GATEWAY_PORT', 'GATEWAY_HOST', 'GATEWAY_AUTH_MODE', 'GATEWAY_JWT_SECRET'],

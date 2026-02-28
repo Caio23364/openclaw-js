@@ -72,6 +72,15 @@ export const VENDOR_REGISTRY: Record<string, VendorConfig> = {
         envVar: 'DEEPSEEK_API_KEY',
         description: 'DeepSeek-V3, DeepSeek-R1',
     },
+    google: {
+        name: 'Google Native',
+        prefix: 'google',
+        baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+        protocol: 'google',
+        requiresKey: true,
+        envVar: 'GOOGLE_API_KEY',
+        description: 'Native Google Generative AI SDK',
+    },
     gemini: {
         name: 'Google Gemini',
         prefix: 'gemini',
@@ -159,6 +168,15 @@ export const VENDOR_REGISTRY: Record<string, VendorConfig> = {
         requiresKey: true,
         envVar: 'VOLCENGINE_API_KEY',
         description: 'ByteDance Doubao models',
+    },
+    kimi: {
+        name: 'Kimi Code',
+        prefix: 'kimi',
+        baseUrl: 'https://api.kimi.com/coding/v1',
+        protocol: 'openai',
+        requiresKey: true,
+        envVar: 'KIMI_API_KEY',
+        description: 'Kimi Code — Advanced coding assistant with reasoning',
     },
     shengsuanyun: {
         name: '神算云 (ShengSuanYun)',

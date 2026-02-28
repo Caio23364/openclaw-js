@@ -79,21 +79,71 @@ export class OpenClaw {
       log.info(`Initialized ${providerManager.getAllProviders().length} providers`);
     }
 
-    // Initialize agents
-    if (this.options.agents) {
-      const agentRuntime = createAgentRuntime();
-      agentRuntime.createAgent('default');
-      log.info('Agent runtime initialized');
-    }
-
-    // Start gateway
+    // Start gateway FIRST (agents need it)
     if (this.options.gateway) {
       const gateway = await createGateway();
       await gateway.start();
       log.info('Gateway started');
     }
 
-    // Initialize channels
+    // Initialize agents AFTER gateway
+    if (this.options.agents) {
+      const agentRuntime = createAgentRuntime();
+      agentRuntime.createAgent('default');
+      log.info('Agent runtime initialized');
+    }
+
+    // Connect Gateway events to AgentRuntime for message processing
+    // MUST be done BEFORE initializing channels to not miss any messages
+    if (this.options.gateway && this.options.agents) {
+      const gateway = getGateway();
+      const agentRuntime = getAgentRuntime();
+      
+      gateway.onEvent('message:received', async (event) => {
+        const message = event.payload as any;
+        log.info(`[Gateway] Received event: message:received from ${message?.channel}`);
+        if (!message) {
+          log.warn('[Gateway] Empty message payload');
+          return;
+        }
+        
+        log.info(`[Gateway] Processing message from ${message.senderName}: ${message.content?.substring(0, 50)}`);
+        
+        try {
+          // Process message and get response
+          log.info(`[Gateway] Calling agentRuntime.processMessage with agent: ${message.agent || 'default'}`);
+          const response = await agentRuntime.processMessage(message, message.agent || 'default');
+          log.info(`[Gateway] Got response: ${response?.substring(0, 50)}...`);
+          
+          // Send response back through the channel
+          if (response && message.chatId) {
+            const channelManager = getChannelManager();
+            const channelId = `${message.channel}:${message.channelId}`;
+            log.info(`[Gateway] Looking for channel: ${channelId}`);
+            const channel = channelManager.getChannel(channelId);
+            if (channel && channel.sendMessage) {
+              log.info(`[Gateway] Sending response to ${message.chatId}`);
+              await channel.sendMessage({
+                chatId: message.chatId,
+                content: response,
+                replyTo: message.id,
+              });
+              log.info('[Gateway] Response sent successfully');
+            } else {
+              log.error(`[Gateway] Channel not found or no sendMessage method: ${channelId}`);
+            }
+          } else {
+            log.warn(`[Gateway] No response or chatId. Response: ${!!response}, chatId: ${message.chatId}`);
+          }
+        } catch (error) {
+          log.error('[Gateway] Error processing message:', error);
+        }
+      });
+      
+      log.info('Gateway connected to AgentRuntime');
+    }
+
+    // Initialize channels (AFTER event handlers are registered)
     if (this.options.channels) {
       const channelManager = createChannelManager();
       await channelManager.initialize();

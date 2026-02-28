@@ -250,7 +250,9 @@ export class ProviderManager {
       stream?: boolean;
     } = {}
   ): Promise<{ content: string; toolCalls?: ToolCall[]; usage?: { input: number; output: number } }> {
+    log.info(`[ProviderManager] chatWithModel called with: ${modelString}`);
     const { vendor, model } = parseModelString(modelString);
+    log.info(`[ProviderManager] Parsed - vendor: ${vendor}, model: ${model}`);
 
     let provider = this.providers.get(vendor);
 

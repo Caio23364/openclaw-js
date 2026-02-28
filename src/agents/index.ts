@@ -74,12 +74,20 @@ const builtInTools: Tool[] = [
     description: 'List all active sessions',
     parameters: [],
     handler: async () => {
-      const gateway = getGateway();
-      const sessions = gateway.getClients();
-      return {
-        success: true,
-        data: sessions,
-      };
+      try {
+        const gateway = getGateway();
+        const sessions = gateway.getClients();
+        return {
+          success: true,
+          data: sessions,
+        };
+      } catch {
+        // Gateway not initialized — return empty list
+        return {
+          success: true,
+          data: [],
+        };
+      }
     },
     requireApproval: false,
     category: 'session',
@@ -218,6 +226,345 @@ const builtInTools: Tool[] = [
     requireApproval: false,
     category: 'session',
   },
+  {
+    name: 'web.search',
+    description: 'Search the web for information. Returns search results with titles, URLs, and snippets.',
+    parameters: [
+      {
+        name: 'query',
+        type: 'string',
+        description: 'Search query',
+        required: true,
+      },
+      {
+        name: 'numResults',
+        type: 'number',
+        description: 'Number of results to return (default: 5)',
+        required: false,
+      },
+    ],
+    handler: async (params) => {
+      try {
+        // Use DuckDuckGo HTML search (no API key needed)
+        const query = encodeURIComponent(params.query);
+        const numResults = params.numResults || 5;
+        
+        const response = await fetch(`https://html.duckduckgo.com/html/?q=${query}`, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        
+        // Parse results (simple regex extraction)
+        const results: Array<{title: string; url: string; snippet: string}> = [];
+        const resultRegex = /<a rel="nofollow" class="result__a" href="([^"]+)">([^<]+)<\/a>[\s\S]*?<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+        let match;
+        
+        while ((match = resultRegex.exec(html)) !== null && results.length < numResults) {
+          results.push({
+            url: match[1].replace(/&amp;/g, '&'),
+            title: match[2].replace(/<[^>]+>/g, ''),
+            snippet: match[3].replace(/<[^>]+>/g, '').trim()
+          });
+        }
+        
+        return {
+          success: true,
+          data: {
+            query: params.query,
+            results: results,
+          },
+        };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    },
+    requireApproval: false,
+    category: 'network',
+  },
+  {
+    name: 'web.fetch',
+    description: 'Fetch and extract content from a URL. Returns the page text content.',
+    parameters: [
+      {
+        name: 'url',
+        type: 'string',
+        description: 'URL to fetch',
+        required: true,
+      },
+      {
+        name: 'maxLength',
+        type: 'number',
+        description: 'Maximum characters to return (default: 5000)',
+        required: false,
+      },
+    ],
+    handler: async (params) => {
+      try {
+        const response = await fetch(params.url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Fetch failed: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        
+        // Simple HTML to text conversion
+        let text = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        
+        const maxLength = params.maxLength || 5000;
+        if (text.length > maxLength) {
+          text = text.substring(0, maxLength) + '\n...[truncated]';
+        }
+        
+        return {
+          success: true,
+          data: {
+            url: params.url,
+            content: text,
+            length: text.length,
+          },
+        };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    },
+    requireApproval: false,
+    category: 'network',
+  },
+  {
+    name: 'shell.execute',
+    description: 'Execute a shell command. Use with caution. Returns command output.',
+    parameters: [
+      {
+        name: 'command',
+        type: 'string',
+        description: 'Command to execute',
+        required: true,
+      },
+      {
+        name: 'timeout',
+        type: 'number',
+        description: 'Timeout in milliseconds (default: 30000)',
+        required: false,
+      },
+    ],
+    handler: async (params) => {
+      try {
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        
+        const timeout = params.timeout || 30000;
+        const { stdout, stderr } = await execAsync(params.command, { timeout });
+        
+        return {
+          success: true,
+          data: {
+            stdout: stdout || '',
+            stderr: stderr || '',
+            command: params.command,
+          },
+        };
+      } catch (error: any) {
+        return { 
+          success: false, 
+          error: error.message,
+          data: {
+            stdout: error.stdout || '',
+            stderr: error.stderr || '',
+          }
+        };
+      }
+    },
+    requireApproval: true,
+    category: 'system',
+  },
+  {
+    name: 'file.read',
+    description: 'Read content from a file. Returns file content as string.',
+    parameters: [
+      {
+        name: 'path',
+        type: 'string',
+        description: 'File path (relative to workspace or absolute)',
+        required: true,
+      },
+      {
+        name: 'encoding',
+        type: 'string',
+        description: 'File encoding (default: utf8)',
+        required: false,
+      },
+    ],
+    handler: async (params, context) => {
+      try {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const { isPathAllowed } = await import('../security/sandbox.js');
+        
+        // Security check
+        const workspace = context.agent.workspace || context.session.workspace || '.';
+        if (!isPathAllowed(params.path, workspace)) {
+          return { success: false, error: 'Path not allowed by sandbox' };
+        }
+        
+        const content = await fs.readFile(params.path, { encoding: params.encoding || 'utf8' });
+        
+        return {
+          success: true,
+          data: {
+            path: params.path,
+            content: content,
+            size: content.length,
+          },
+        };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    },
+    requireApproval: false,
+    category: 'file',
+  },
+  {
+    name: 'file.write',
+    description: 'Write content to a file. Creates file if it does not exist.',
+    parameters: [
+      {
+        name: 'path',
+        type: 'string',
+        description: 'File path (relative to workspace or absolute)',
+        required: true,
+      },
+      {
+        name: 'content',
+        type: 'string',
+        description: 'Content to write',
+        required: true,
+      },
+      {
+        name: 'append',
+        type: 'boolean',
+        description: 'Append to file instead of overwriting (default: false)',
+        required: false,
+      },
+    ],
+    handler: async (params, context) => {
+      try {
+        const fs = await import('fs/promises');
+        const { isPathAllowed } = await import('../security/sandbox.js');
+        
+        // Security check
+        const workspace = context.agent.workspace || context.session.workspace || '.';
+        if (!isPathAllowed(params.path, workspace)) {
+          return { success: false, error: 'Path not allowed by sandbox' };
+        }
+        
+        if (params.append) {
+          await fs.appendFile(params.path, params.content, 'utf8');
+        } else {
+          await fs.writeFile(params.path, params.content, 'utf8');
+        }
+        
+        return {
+          success: true,
+          data: {
+            path: params.path,
+            bytesWritten: params.content.length,
+            appended: params.append || false,
+          },
+        };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    },
+    requireApproval: true,
+    category: 'file',
+  },
+  {
+    name: 'file.list',
+    description: 'List files and directories in a path.',
+    parameters: [
+      {
+        name: 'path',
+        type: 'string',
+        description: 'Directory path (default: current directory)',
+        required: false,
+      },
+      {
+        name: 'recursive',
+        type: 'boolean',
+        description: 'List recursively (default: false)',
+        required: false,
+      },
+    ],
+    handler: async (params, context) => {
+      try {
+        const fs = await import('fs/promises');
+        const pathModule = await import('path');
+        const { isPathAllowed } = await import('../security/sandbox.js');
+        
+        const targetPath = params.path || '.';
+        
+        // Security check
+        const workspace = context.agent.workspace || context.session.workspace || '.';
+        if (!isPathAllowed(targetPath, workspace)) {
+          return { success: false, error: 'Path not allowed by sandbox' };
+        }
+        
+        async function listDir(dirPath: string, recursive: boolean): Promise<any[]> {
+          const entries = await fs.readdir(dirPath, { withFileTypes: true });
+          const result = [];
+          
+          for (const entry of entries) {
+            const fullPath = pathModule.join(dirPath, entry.name);
+            const item = {
+              name: entry.name,
+              path: fullPath,
+              type: entry.isDirectory() ? 'directory' : 'file',
+            };
+            
+            if (entry.isDirectory() && recursive) {
+              (item as any).children = await listDir(fullPath, recursive);
+            }
+            
+            result.push(item);
+          }
+          
+          return result;
+        }
+        
+        const items = await listDir(targetPath, params.recursive || false);
+        
+        return {
+          success: true,
+          data: {
+            path: targetPath,
+            items: items,
+          },
+        };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    },
+    requireApproval: false,
+    category: 'file',
+  },
 ];
 
 // Session TTL defaults (picoclaw-inspired)
@@ -248,6 +595,26 @@ export class AgentRuntime {
   }
 
   /**
+   * Auto-detect AI provider based on available API keys in environment.
+   */
+  private detectProviderFromEnv(): { provider: string; model: string } {
+    // Check if AI_MODEL is explicitly provided
+    const explicitModel = process.env.AI_MODEL;
+    if (explicitModel && explicitModel.trim().length > 0) {
+      const modelStr = explicitModel.trim();
+      const slashIndex = modelStr.indexOf('/');
+      if (slashIndex !== -1) {
+        return { provider: modelStr.slice(0, slashIndex), model: modelStr.slice(slashIndex + 1) };
+      } else {
+        return { provider: 'google', model: modelStr };
+      }
+    }
+
+    log.error('AI_MODEL environment variable must be explicitly defined (e.g., AI_MODEL=google/gemini-2.0-flash)');
+    process.exit(1);
+  }
+
+  /**
    * Auto-cleanup inactive sessions to prevent memory leaks.
    * Inspired by picoclaw's bounded resource management.
    */
@@ -269,10 +636,29 @@ export class AgentRuntime {
   }
 
   public createAgent(id: string, config: Partial<AgentConfig> = {}): Agent {
+    // Auto-detect provider from environment
+    const detectedProvider = this.detectProviderFromEnv();
+    log.info(`[Agent] Creating agent ${id} with auto-detected provider: ${detectedProvider.provider}`);
+
     const defaultConfig: AgentConfig = {
-      model: 'claude-3-opus-20240229',
-      provider: 'anthropic',
-      systemPrompt: 'You are OpenClaw, a helpful AI assistant.',
+      model: detectedProvider.model,
+      provider: detectedProvider.provider,
+      systemPrompt: `You are OpenClaw, an autonomous AI assistant with access to tools.
+
+When the user asks something, be proactive and use available tools to help:
+- Use 'web.search' to find current information on the internet
+- Use 'web.fetch' to read content from specific URLs
+- Use 'shell.execute' to run commands (requires approval)
+- Use 'file.read', 'file.write', 'file.list' to work with files
+- Use 'system.time' to get current time
+
+Always use tools when you need:
+- Current/real-time information (weather, news, prices, etc.)
+- To perform calculations or data processing
+- To read or write files
+- To search for information online
+
+After using tools, provide a complete answer based on the results.`,
       temperature: 0.7,
       maxTokens: 4096,
       topP: 1,
@@ -310,8 +696,12 @@ export class AgentRuntime {
     this.agents.set(id, agent);
     log.info(`Created agent: ${id}`);
 
-    // Register with gateway
-    getGateway().addAgent(agent);
+    // Register with gateway (if initialized)
+    try {
+      getGateway().addAgent(agent);
+    } catch {
+      // Gateway not initialized (e.g., CLI mode without gateway) — skip registration
+    }
 
     return agent;
   }
@@ -359,8 +749,12 @@ export class AgentRuntime {
     this.sessions.set(sessionId, session);
     agent.status.sessionCount++;
 
-    // Register with gateway
-    getGateway().addSession(session);
+    // Register with gateway (if initialized)
+    try {
+      getGateway().addSession(session);
+    } catch {
+      // Gateway not initialized — skip
+    }
 
     // Record metrics
     getMetrics().recordSessionCreated(sessionId, 'web');
@@ -431,6 +825,7 @@ export class AgentRuntime {
 
     const providerStart = Date.now();
     const modelString = `${agent.config.provider}/${agent.config.model}`;
+    log.info(`[Agent] Using model string: ${modelString} (provider: ${agent.config.provider}, model: ${agent.config.model})`);
     let response;
 
     // Call AI provider (Stream or Failover)
@@ -470,6 +865,17 @@ export class AgentRuntime {
 
     // Handle tool calls
     if (response.toolCalls && response.toolCalls.length > 0) {
+      // Add assistant message with tool calls to context FIRST
+      const toolCallMessage: Message = {
+        id: generateId(),
+        sessionId,
+        role: 'assistant',
+        content: response.content || '',
+        timestamp: new Date(),
+        toolCalls: response.toolCalls,
+      };
+      session.context.push(toolCallMessage);
+
       const toolResults: ToolResult[] = [];
 
       for (const toolCall of response.toolCalls) {
@@ -556,8 +962,12 @@ export class AgentRuntime {
     // Record message sent metric
     getMetrics().recordMessageSent(session.channel);
 
-    // Update session in gateway
-    getGateway().updateSession(sessionId, session);
+    // Update session in gateway (if initialized)
+    try {
+      getGateway().updateSession(sessionId, session);
+    } catch {
+      // Gateway not initialized — skip
+    }
 
     return response.content;
   }
@@ -667,7 +1077,12 @@ export class AgentRuntime {
   public deleteSession(sessionId: string): void {
     getMetrics().recordSessionEnded(sessionId);
     this.sessions.delete(sessionId);
-    getGateway().removeSession(sessionId);
+    // Remove from gateway (if initialized)
+    try {
+      getGateway().removeSession(sessionId);
+    } catch {
+      // Gateway not initialized — skip
+    }
     log.info(`Deleted session: ${sessionId}`);
   }
 

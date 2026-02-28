@@ -23,6 +23,7 @@ export interface TelegramConfig extends ChannelConfig {
   webhookUrl?: string;
   allowedUpdates?: string[];
   dropPendingUpdates?: boolean;
+  allowedUsers?: string[];
 }
 
 interface SessionData {
@@ -64,9 +65,47 @@ export class TelegramChannel {
       }),
     }));
 
-    // Logging middleware
+    // Authentication middleware
+    this.bot.use(async (ctx, next) => {
+      if (this.config.allowedUsers && this.config.allowedUsers.length > 0) {
+        const userId = ctx.from?.id.toString();
+        const username = ctx.from?.username;
+        const isAllowed = (userId && this.config.allowedUsers.includes(userId)) ||
+          (username && this.config.allowedUsers.includes(username));
+
+        if (!isAllowed) {
+          log.warn(`[Telegram] Unauthorized access attempt from user ID: ${userId}, Username: ${username}`);
+          if (ctx.message || ctx.callbackQuery) {
+            try {
+              await ctx.reply('⛔ Você não está autorizado a usar este bot. / You are not authorized to use this bot.');
+            } catch (e) {
+              // Ignore errors sending unauthorized message
+            }
+          }
+          return; // Stop processing
+        }
+      }
+      await next();
+    });
+
+    // Logging & Feedback middleware
     this.bot.use(async (ctx, next) => {
       const start = Date.now();
+
+      // Visual feedback
+      if (ctx.message || ctx.channelPost) {
+        try {
+          // Typings action
+          await ctx.replyWithChatAction('typing');
+          // Add emoji reaction
+          if (ctx.react) {
+            await ctx.react('🤔');
+          }
+        } catch (e) {
+          // Ignore reaction/typing errors (e.g. lack of permissions or unsupported)
+        }
+      }
+
       await next();
       const ms = Date.now() - start;
       log.debug(`Telegram update processed in ${ms}ms`);
@@ -491,10 +530,22 @@ export class TelegramChannel {
             });
         }
       } else {
-        await this.bot.api.sendMessage(chatId, message.content, {
-          parse_mode: parseMode,
-          reply_to_message_id: message.replyTo ? parseInt(message.replyTo) : undefined,
-        });
+        try {
+          await this.bot.api.sendMessage(chatId, message.content, {
+            parse_mode: parseMode,
+            reply_to_message_id: message.replyTo ? parseInt(message.replyTo) : undefined,
+          });
+        } catch (sendErr: any) {
+          // Fallback if the original message to reply to was deleted
+          if (sendErr.message?.includes('message to be replied not found')) {
+            log.warn(`Message to be replied not found (${message.replyTo}), sending as new message to ${chatId}`);
+            await this.bot.api.sendMessage(chatId, message.content, {
+              parse_mode: parseMode,
+            });
+          } else {
+            throw sendErr;
+          }
+        }
       }
 
       log.info(`Sent Telegram message to ${chatId}: ${message.content.substring(0, 50)}...`);

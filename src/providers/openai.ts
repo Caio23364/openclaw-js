@@ -35,11 +35,21 @@ export class OpenAIProvider implements Provider {
 
   constructor(config: OpenAIProviderConfig) {
     this.config = config;
+    
+    // Detect if this is Kimi Code provider (based on baseUrl)
+    const isKimiCode = config.baseUrl?.includes('kimi.com');
+    
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
       organization: config.organization,
       project: config.project,
+      // For Kimi Code, identify as a coding agent (Claude Code compatible)
+      defaultHeaders: isKimiCode ? {
+        'User-Agent': 'ClaudeCode/0.1.0',
+        'X-Client-Name': 'claude-code',
+        'X-Claude-Client': 'claude-code',
+      } : undefined,
     });
     this.models = this.getAvailableModels();
   }
@@ -175,6 +185,36 @@ export class OpenAIProvider implements Provider {
     ];
   }
 
+  /**
+   * Sanitize function name for OpenAI-compatible APIs.
+   * Some providers (like Kimi) don't accept dots in function names.
+   */
+  private sanitizeFunctionName(name: string): string {
+    return name.replace(/\./g, '_');
+  }
+
+  /**
+   * Restore original function name from sanitized version.
+   */
+  private restoreFunctionName(name: string): string {
+    // Map of sanitized names back to original (dots replaced by underscores)
+    const nameMap: Record<string, string> = {
+      'system_info': 'system.info',
+      'system_time': 'system.time',
+      'sessions_list': 'sessions.list',
+      'sessions_send': 'sessions.send',
+      'sessions_history': 'sessions.history',
+      'sessions_spawn': 'sessions.spawn',
+      'web_search': 'web.search',
+      'web_fetch': 'web.fetch',
+      'shell_execute': 'shell.execute',
+      'file_read': 'file.read',
+      'file_write': 'file.write',
+      'file_list': 'file.list',
+    };
+    return nameMap[name] || name;
+  }
+
   public async chat(
     messages: Message[],
     options: {
@@ -219,7 +259,7 @@ export class OpenAIProvider implements Provider {
         request.tools = options.tools.map((tool) => ({
           type: 'function',
           function: {
-            name: tool.name,
+            name: this.sanitizeFunctionName(tool.name),
             description: tool.description,
             parameters: {
               type: 'object',
@@ -242,7 +282,7 @@ export class OpenAIProvider implements Provider {
         for (const toolCall of message.tool_calls) {
           toolCalls.push({
             id: toolCall.id,
-            name: toolCall.function.name,
+            name: this.restoreFunctionName(toolCall.function.name),
             arguments: JSON.parse(toolCall.function.arguments),
           });
         }
@@ -305,7 +345,7 @@ export class OpenAIProvider implements Provider {
         request.tools = options.tools.map((tool) => ({
           type: 'function',
           function: {
-            name: tool.name,
+            name: this.sanitizeFunctionName(tool.name),
             description: tool.description,
             parameters: {
               type: 'object',
@@ -332,7 +372,7 @@ export class OpenAIProvider implements Provider {
                 type: 'tool_call',
                 data: {
                   id: toolCall.id || '',
-                  name: toolCall.function.name,
+                  name: this.restoreFunctionName(toolCall.function.name),
                   arguments: JSON.parse(toolCall.function.arguments || '{}'),
                 },
               };

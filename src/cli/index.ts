@@ -21,6 +21,7 @@ import { getCronManager, createCronManager } from '../cron/index.js';
 import { getBrowserManager, createBrowserManager } from '../browser/index.js';
 import { loadConfig, saveConfig, updateConfig, ensureDirectories } from '../utils/config.js';
 import { generatePairingCode } from '../utils/helpers.js';
+import type { AgentConfig } from '../types/index.js';
 
 const program = new Command();
 
@@ -279,7 +280,27 @@ program
       // Ensure agent exists
       let agent = agentRuntime.getAgent(options.agent);
       if (!agent) {
-        agent = agentRuntime.createAgent(options.agent);
+        // Parse model string if provided (e.g., "kimi/kimi-for-coding")
+        const agentConfig: Partial<AgentConfig> = {};
+        if (options.model) {
+          const slashIndex = options.model.indexOf('/');
+          if (slashIndex !== -1) {
+            agentConfig.provider = options.model.slice(0, slashIndex);
+            agentConfig.model = options.model.slice(slashIndex + 1);
+          } else {
+            agentConfig.model = options.model;
+          }
+        }
+        agent = agentRuntime.createAgent(options.agent, agentConfig);
+      } else if (options.model) {
+        // Update existing agent with new model
+        const slashIndex = options.model.indexOf('/');
+        if (slashIndex !== -1) {
+          agent.config.provider = options.model.slice(0, slashIndex);
+          agent.config.model = options.model.slice(slashIndex + 1);
+        } else {
+          agent.config.model = options.model;
+        }
       }
 
       if (options.message) {
